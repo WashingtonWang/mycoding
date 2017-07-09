@@ -27,6 +27,7 @@
 	<modules>
 		<module>factorypattern</module>
 		<module>java8feature</module>
+		<module>javaclassload</module>
 	</modules>
 
 	<dependencyManagement>
