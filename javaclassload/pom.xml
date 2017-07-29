@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.xiangyu</groupId>
 		<artifactId>mycoding</artifactId>
-		<version>${project.version}</version>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.mycoding</groupId>
