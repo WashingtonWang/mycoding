@@ -1,4 +1,4 @@
-package com.xiangyu.streamtest;
+package com.xiangyu.stream;
 
 /**
  * Created by xiangyu.wang on 2017/7/1.
