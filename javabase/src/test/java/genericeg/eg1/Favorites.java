@@ -1,10 +1,14 @@
-package generic;
+package genericeg.eg1;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * 本类打印的是什么结果
+ */
 public class Favorites {
 
     private Map<Class<?>, Object> favorites  = new HashMap<Class<?>,Object>();
