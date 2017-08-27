@@ -1,7 +1,16 @@
 package threadeg.eg1;
 
 public class Widget {
-    public synchronized void doSomething(){
-        System.out.println("Widget: i am parent.");
+
+    public  void doSomething(){
+        synchronized(this){
+            System.out.println(this.getClass());
+            System.out.println("i am is widget");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

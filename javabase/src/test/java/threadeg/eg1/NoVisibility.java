@@ -1,5 +1,8 @@
-package threadeg.eg2;
+package threadeg.eg1;
 
+/**
+ * 此类可能会永远循环下去
+ */
 public class NoVisibility {
     private static boolean ready;
     private static int number;
