@@ -38,7 +38,7 @@
 		<module>javaclassload</module>
 		<module>kotlinlearn</module>
 		<module>javabase</module>
-	</modules>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
