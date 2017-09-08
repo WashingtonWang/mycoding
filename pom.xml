@@ -31,6 +31,10 @@
 		<commons-logging.version>1.2</commons-logging.version>
 		<!-- Incremental compilation To make your builds faster-->
 		<kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+		<properties>
+			<maven.compiler.source>1.8</maven.compiler.source>
+			<maven.compiler.target>1.8</maven.compiler.target>
+		</properties>
 	</properties>
 
 	<modules>
