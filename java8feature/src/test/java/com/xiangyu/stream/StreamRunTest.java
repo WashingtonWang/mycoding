@@ -1,4 +1,4 @@
-package com.xiangyu.streamtest;
+package com.xiangyu.stream;
 
 
 import java.util.List;
