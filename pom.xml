@@ -22,26 +22,23 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<kotlin.version>1.1.3-2</kotlin.version>
-		<lombok.version>1.16.18.0</lombok.version>
+		<lombok.version>1.16.18</lombok.version>
 		<maven.compiler.version>3.5.1</maven.compiler.version>
 		<spring.boot.version>1.5.4.RELEASE</spring.boot.version>
 		<mybatis.spring.boot.version>1.3.0</mybatis.spring.boot.version>
 		<fastjson.version>1.2.28</fastjson.version>
 		<commons-logging.version>1.2</commons-logging.version>
 		<!-- Incremental compilation To make your builds faster-->
-		<kotlin.compiler.incremental>true</kotlin.compiler.incremental>
-		<properties>
-			<maven.compiler.source>1.8</maven.compiler.source>
-			<maven.compiler.target>1.8</maven.compiler.target>
-		</properties>
+		<!--<properties>-->
+			<!--<maven.compiler.source>1.8</maven.compiler.source>-->
+			<!--<maven.compiler.target>1.8</maven.compiler.target>-->
+		<!--</properties>-->
 	</properties>
 
 	<modules>
 		<module>factorypattern</module>
 		<module>java8feature</module>
 		<module>javaclassload</module>
-		<module>kotlinlearn</module>
 		<module>javabase</module>
 	</modules>
 
@@ -55,8 +52,9 @@
 			<!--lombok-->
 			<dependency>
 				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok-maven</artifactId>
-				<version>${lombok.version}</version>
+				<artifactId>lombok</artifactId>
+				<version>1.16.18</version>
+				<scope>provided</scope>
 			</dependency>
 			<!-- mybatis-->
 			<dependency>
@@ -69,27 +67,6 @@
 				<groupId>com.alibaba</groupId>
 				<artifactId>fastjson</artifactId>
 				<version>${fastjson.version}</version>
-			</dependency>
-			<!--kotlin-->
-			<dependency>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-stdlib-jre8</artifactId>
-				<version>${kotlin.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-reflect</artifactId>
-				<version>${kotlin.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-test</artifactId>
-				<version>${kotlin.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-test-junit</artifactId>
-				<version>${kotlin.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-logging</groupId>
@@ -106,40 +83,6 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring.boot.version}</version>
-				</plugin>
-
-				<plugin>
-					<groupId>org.jetbrains.kotlin</groupId>
-					<artifactId>kotlin-maven-plugin</artifactId>
-					<version>${kotlin.version}</version>
-					<executions>
-						<execution>
-							<id>compile</id>
-							<phase>compile</phase>
-							<goals>
-								<goal>compile</goal>
-							</goals>
-							<configuration>
-								<sourceDirs>
-									<sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-									<sourceDir>${project.basedir}/src/main/java</sourceDir>
-								</sourceDirs>
-							</configuration>
-						</execution>
-						<execution>
-							<id>test-compile</id>
-							<phase>test-compile</phase>
-							<goals>
-								<goal>test-compile</goal>
-							</goals>
-							<configuration>
-								<sourceDirs>
-									<sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
-									<sourceDir>${project.basedir}/src/test/java</sourceDir>
-								</sourceDirs>
-							</configuration>
-						</execution>
-					</executions>
 				</plugin>
 
 				<plugin>
