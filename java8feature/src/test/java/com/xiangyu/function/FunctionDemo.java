@@ -28,11 +28,10 @@ public class FunctionDemo {
         //};
         //System.out.println(function.apply("hello world"));
 
-        Predicate<String> pre = (x) -> {
-            System.out.print(x);
-            return false;
-        };
-        System.out.println(": " + pre.test("hello world"));
-
+        //Predicate<String> pre = (x) -> {
+        //    System.out.print(x);
+        //    return false;
+        //};
+        //System.out.println(": " + pre.test("hello world"));
     }
 }
