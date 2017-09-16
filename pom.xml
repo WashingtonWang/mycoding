@@ -39,6 +39,7 @@
         <module>javabase</module>
         <module>springbootlearn</module>
         <module>springframework</module>
+        <module>designpatterns</module>
     </modules>
 
     <dependencyManagement>
