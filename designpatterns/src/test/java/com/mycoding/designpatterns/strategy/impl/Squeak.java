@@ -1,6 +1,6 @@
-package designpattern.strategy.impl;
+package com.mycoding.designpatterns.strategy.impl;
 
-import designpattern.strategy.QuackBehavior;
+import com.mycoding.designpatterns.strategy.QuackBehavior;
 
 public class Squeak implements QuackBehavior {
     public void quack() {
