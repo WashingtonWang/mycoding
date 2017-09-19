@@ -1,4 +1,4 @@
-package designpattern.strategy.duck;
+package com.mycoding.designpatterns.strategy.duck;
 
 public class RedheadDuck extends Duck{
 

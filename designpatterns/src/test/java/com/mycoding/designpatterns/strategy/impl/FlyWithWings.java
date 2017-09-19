@@ -1,6 +1,6 @@
-package designpattern.strategy.impl;
+package com.mycoding.designpatterns.strategy.impl;
 
-import designpattern.strategy.FlyBehavior;
+import com.mycoding.designpatterns.strategy.FlyBehavior;
 
 public class FlyWithWings implements FlyBehavior {
     public void fly() {

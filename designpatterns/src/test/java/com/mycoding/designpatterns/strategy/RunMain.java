@@ -1,8 +1,8 @@
-package designpattern.strategy;
+package com.mycoding.designpatterns.strategy;
 
-import designpattern.strategy.duck.Duck;
-import designpattern.strategy.duck.ModelDuck;
-import designpattern.strategy.impl.FlyRocketPowered;
+import com.mycoding.designpatterns.strategy.duck.Duck;
+import com.mycoding.designpatterns.strategy.duck.ModelDuck;
+import com.mycoding.designpatterns.strategy.impl.FlyRocketPowered;
 
 public class RunMain {
     public static void main(String[] args){
