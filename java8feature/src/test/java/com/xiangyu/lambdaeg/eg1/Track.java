@@ -3,11 +3,12 @@ package com.xiangyu.lambdaeg.eg1;
 public class Track {
 
     private String name;
-    private int Length;
+    private int length;
+
 
     public Track(String name, int length) {
         this.name = name;
-        Length = length;
+        this.length = length;
     }
 
     public String getName() {
@@ -19,10 +20,10 @@ public class Track {
     }
 
     public int getLength() {
-        return Length;
+        return length;
     }
 
     public void setLength(int length) {
-        Length = length;
+        this.length = length;
     }
 }
