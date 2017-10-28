@@ -20,9 +20,9 @@ public class StreamEg1 {
                 .collect(Collectors.toList());
         System.out.println(together);
 
-        List<Track> tracks = Arrays.asList(new Track("Bakai"),
-                new Track("Violets for your Furs"),
-                new Track("Time Was"));
+        List<Track> tracks = Arrays.asList(new Track("Bakai",1),
+                new Track("Violets for your Furs",2),
+                new Track("Time Was",3));
         Track shortestTrack = tracks.stream()
                 .min(Comparator.comparing(Track::getName))
                 .get();
