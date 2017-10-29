@@ -27,6 +27,7 @@ public class RunMain {
 
     /**
      * stream中的元素顺序(如果是有序集合 stream的元素出现就按出现顺序排列，如果是无序集合，stream中元素也是无序的
+     * 注意：（stream有些操作有时会产生顺序）
      */
     public static void testCollectOrder(){
         List<Integer> numbers = Arrays.asList(1,2,3,4);
@@ -36,7 +37,32 @@ public class RunMain {
 
         Set<Integer> sets = new HashSet<>(Arrays.asList(4,3,2,1));
         List<Integer> setOrder = sets.stream().collect(Collectors.toList());
-        System.out.println(sets.equals(setOrder));
+
+        List<Integer> ll = sets.stream()
+                .map(x -> x + 1)
+                .collect(Collectors.toList());
+        System.out.println(ll);
+
+        List<Integer> listOne = Arrays.asList(4,2,3,1);
+        List<Integer> resultList = listOne.stream()
+                .map(x -> x + 1)
+                .collect(Collectors.toList());
+        System.out.println(resultList);
+
+        /**
+         * stream 有序操作
+         */
+        Set<Integer> numbersOne = new HashSet<>(Arrays.asList(3,4,1,2));
+        List<Integer> sameOrderOne = numbersOne.stream()
+                .sorted()
+                .collect(Collectors.toList());
+        System.out.println(numbers.equals(sameOrderOne));
+
+        List<Integer> unordered = numbersOne.stream()
+                .map(x -> x + 1)
+                .collect(Collectors.toList());
+        System.out.println(unordered);
+
     }
 
     public static void main(String[] args){
