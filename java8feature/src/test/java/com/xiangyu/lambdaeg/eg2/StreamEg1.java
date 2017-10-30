@@ -3,11 +3,9 @@ package com.xiangyu.lambdaeg.eg2;
 import com.xiangyu.lambdaeg.eg1.Album;
 import com.xiangyu.lambdaeg.eg1.Artist;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -62,10 +60,49 @@ public class StreamEg1 {
     /***********************stream 数据分组 end***************************/
 
     /***********************stream 字符串 start***************************/
-
+    /**
+     * 用stream输出 格式为："[Geoge Harrison, John Lennon, Paul McCartney, Rigo Starr]"
+     * @param artists
+     */
+    public static void streamJoining(List<Artist> artists){
+        String result = artists.stream()
+                .map(Artist::getName)
+                .collect(Collectors.joining(",","[","]"));
+        System.out.println(result);
+    }
     /***********************stream 字符串 end*****************************/
 
-    public static void main(String[] args){
 
+    /***********************stream 组合收集器 start*****************************/
+    //使用收集器计算每个艺术家的专辑数
+    public Map<Artist, Long> numberOfAlbums(Stream<Album> albums){
+        return albums.collect(groupingBy(album -> album.getMainMusician(),counting()));
+    }
+
+    //使用收集器求每个艺术家的专辑名
+    public Map<Artist,List<String>> nameOfAlbums(Stream<Album> albums){
+        return albums.collect(groupingBy(Album::getMainMusician,mapping(Album::getName, toList())));
+    }
+    /***********************stream 组合收集器 end*****************************/
+
+
+    public static void main(String[] args){
+        List<Artist> allArtists = new ArrayList<>();
+        List members = new ArrayList();
+        members.add("wang");
+        members.add("xiang");
+        members.add("yu");
+        Artist artist1 = new Artist("1",members,"London",false);
+        Artist artist2 = new Artist("2",members,"London",true);
+        Artist artist3 = new Artist("3",members,"Old JinShan",true);
+        Artist artist4 = new Artist("4",members,"Washington DC",true);
+        Artist artist5 = new Artist("5",members,"LuoShanJi",false);
+
+        allArtists.add(artist1);
+        allArtists.add(artist2);
+        allArtists.add(artist3);
+        allArtists.add(artist4);
+        allArtists.add(artist5);
+        streamJoining(allArtists);
     }
 }
