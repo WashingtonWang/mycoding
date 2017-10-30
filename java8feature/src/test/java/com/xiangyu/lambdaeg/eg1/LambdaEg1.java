@@ -14,11 +14,11 @@ public class LambdaEg1 {
         members.add("wang");
         members.add("xiang");
         members.add("yu");
-        Artist artist1 = new Artist("1",members,"London");
-        Artist artist2 = new Artist("2",members,"London");
-        Artist artist3 = new Artist("3",members,"Old JinShan");
-        Artist artist4 = new Artist("4",members,"Washington DC");
-        Artist artist5 = new Artist("5",members,"LuoShanJi");
+        Artist artist1 = new Artist("1",members,"London",false);
+        Artist artist2 = new Artist("2",members,"London",true);
+        Artist artist3 = new Artist("3",members,"Old JinShan",true);
+        Artist artist4 = new Artist("4",members,"Washington DC",true);
+        Artist artist5 = new Artist("5",members,"LuoShanJi",false);
 
         allArtists.add(artist1);
         allArtists.add(artist2);
