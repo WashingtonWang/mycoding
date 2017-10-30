@@ -6,6 +6,7 @@ public class Album {
     private String name;
     private List<Track> tracks;
     private List<Artist> musicians;
+    private Artist mainMusician;
 
     public String getName() {
         return name;
@@ -29,5 +30,13 @@ public class Album {
 
     public void setMusicians(List<Artist> musicians) {
         this.musicians = musicians;
+    }
+
+    public Artist getMainMusician() {
+        return mainMusician;
+    }
+
+    public void setMainMusician(Artist mainMusician) {
+        this.mainMusician = mainMusician;
     }
 }

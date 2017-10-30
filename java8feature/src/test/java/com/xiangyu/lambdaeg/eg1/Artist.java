@@ -6,11 +6,13 @@ public class Artist {
     private String name;
     private List members;
     private String origin;
+    private boolean solo;
 
-    public Artist(String name, List members, String origin) {
+    public Artist(String name, List members, String origin, boolean solo) {
         this.name = name;
         this.members = members;
         this.origin = origin;
+        this.solo = solo;
     }
 
     public boolean isFrom(String from){
@@ -41,5 +43,13 @@ public class Artist {
 
     public void setOrigin(String origin) {
         this.origin = origin;
+    }
+
+    public boolean isSolo() {
+        return solo;
+    }
+
+    public void setSolo(boolean solo) {
+        this.solo = solo;
     }
 }
