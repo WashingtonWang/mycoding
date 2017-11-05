@@ -85,6 +85,11 @@ public class StreamEg1 {
     }
     /***********************stream 组合收集器 end*****************************/
 
+    /***********************stream 重构和定制收集器 start*****************************/
+
+
+    /***********************stream 重构和定制收集器 end*****************************/
+
 
     public static void main(String[] args){
         List<Artist> allArtists = new ArrayList<>();
@@ -92,11 +97,11 @@ public class StreamEg1 {
         members.add("wang");
         members.add("xiang");
         members.add("yu");
-        Artist artist1 = new Artist("1",members,"London",false);
-        Artist artist2 = new Artist("2",members,"London",true);
-        Artist artist3 = new Artist("3",members,"Old JinShan",true);
-        Artist artist4 = new Artist("4",members,"Washington DC",true);
-        Artist artist5 = new Artist("5",members,"LuoShanJi",false);
+        Artist artist1 = new Artist("张三",members,"London",false);
+        Artist artist2 = new Artist("李四",members,"London",true);
+        Artist artist3 = new Artist("王五",members,"Old JinShan",true);
+        Artist artist4 = new Artist("赵六",members,"Washington DC",true);
+        Artist artist5 = new Artist("小八",members,"LuoShanJi",false);
 
         allArtists.add(artist1);
         allArtists.add(artist2);
@@ -104,5 +109,8 @@ public class StreamEg1 {
         allArtists.add(artist4);
         allArtists.add(artist5);
         streamJoining(allArtists);
+
     }
+
+
 }
