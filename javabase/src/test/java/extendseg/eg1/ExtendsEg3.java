@@ -11,5 +11,10 @@ public class ExtendsEg3 extends ExtendsEg2 {
 
     public static void main(String[] args) {
         ExtendsEg3 eg3 = new ExtendsEg3();
+        eg3.test();
+    }
+
+    public void test(){
+        System.out.println("ExtendsEg3 test");
     }
 }

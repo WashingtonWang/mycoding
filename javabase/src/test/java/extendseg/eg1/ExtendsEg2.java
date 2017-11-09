@@ -8,4 +8,8 @@ public class ExtendsEg2 extends ExtendsEg1 {
     ExtendsEg2(){
         System.out.println("I am ExtendsEg2");
     }
+
+    public void test(){
+        System.out.println("ExtendsEg2 test");
+    }
 }
