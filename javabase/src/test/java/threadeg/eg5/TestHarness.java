@@ -35,7 +35,7 @@ public class TestHarness {
             //        }finally {
             //            endGate.countDown();
             //        }
-            //    }catch (InterruptedException i){}
+            //    }catch (InterruptedException d){}
             //}).start();
         }
 
