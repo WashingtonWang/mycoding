@@ -92,5 +92,21 @@ public class LogService {
         }
     }
 
+    /**
+     * 通过注册一个关闭钩子来停止日志服务 《java并发编程实战》 P.136
+     */
+    public void hook(){
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            public void run(){
+                //操作
+                try {
+                    LogService.this.stop();
+                }catch (InterruptedException ignored){
+                    //
+                }
+            }
+        });
+    }
+
 
 }
