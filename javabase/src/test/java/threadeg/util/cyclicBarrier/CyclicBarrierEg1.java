@@ -1,4 +1,4 @@
-package threadeg.cyclicBarrier;
+package threadeg.util.cyclicBarrier;
 
 import java.util.concurrent.CyclicBarrier;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.CyclicBarrier;
  * @Auther: wangxiangyu
  * @Date: 2017/12/10 22:13
  */
-public class TestCyclicBarrier {
+public class CyclicBarrierEg1 {
     private static final int THREAD_NUM = 5;
 
     public static class WorkerThread implements Runnable{
