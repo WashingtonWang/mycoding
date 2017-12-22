@@ -1,8 +1,8 @@
-package com.xiangyu.lambdaeg.eg2;
+package com.xiangyu.function.lambda.eg2;
 
-import com.xiangyu.lambdaeg.eg1.Album;
-import com.xiangyu.lambdaeg.eg1.Artist;
-import com.xiangyu.stream.Person;
+import com.xiangyu.function.lambda.eg3.Album;
+import com.xiangyu.function.lambda.eg3.Artist;
+import com.xiangyu.function.stream.eg1.Person;
 
 import java.io.BufferedReader;
 import java.io.IOException;

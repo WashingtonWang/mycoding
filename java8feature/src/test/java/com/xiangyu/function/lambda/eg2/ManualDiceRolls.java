@@ -1,4 +1,4 @@
-package com.xiangyu.lambdaeg.eg2;
+package com.xiangyu.function.lambda.eg2;
 
 import java.util.ArrayList;
 import java.util.List;

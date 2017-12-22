@@ -1,4 +1,4 @@
-package com.xiangyu.lambdaeg.eg2;
+package com.xiangyu.function.lambda.eg2;
 
 /**
  * 看一下 lamdba 生成的东西

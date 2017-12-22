@@ -1,12 +1,9 @@
-package com.xiangyu.lambdaeg.eg2;
+package com.xiangyu.function.lambda.eg2;
 
-import com.xiangyu.lambdaeg.eg1.Album;
-import com.xiangyu.lambdaeg.eg1.Artist;
-import com.xiangyu.lambdaeg.eg1.Track;
+import com.xiangyu.function.lambda.eg3.Album;
+import com.xiangyu.function.lambda.eg3.Artist;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;

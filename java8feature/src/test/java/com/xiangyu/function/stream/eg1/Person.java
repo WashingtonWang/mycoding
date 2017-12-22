@@ -1,4 +1,4 @@
-package com.xiangyu.stream;
+package com.xiangyu.function.stream.eg1;
 
 /**
  * Created by xiangyu.wang on 2017/7/1.

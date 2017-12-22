@@ -1,4 +1,4 @@
-package com.xiangyu.stream;
+package com.xiangyu.function.stream.eg1;
 
 
 import java.util.List;

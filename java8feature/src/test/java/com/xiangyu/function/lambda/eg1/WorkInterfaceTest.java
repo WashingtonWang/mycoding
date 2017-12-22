@@ -1,6 +1,4 @@
-package com.xiangyu.lambda.eg1;
-
-import java.util.function.Consumer;
+package com.xiangyu.function.lambda.eg1;
 
 public class WorkInterfaceTest {
 

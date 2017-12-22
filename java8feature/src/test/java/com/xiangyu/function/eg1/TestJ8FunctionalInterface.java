@@ -1,7 +1,5 @@
 package com.xiangyu.function.eg1;
 
-import javax.sound.midi.Soundbank;
-
 public class TestJ8FunctionalInterface implements Func {
     @Override
     public void fun() {
