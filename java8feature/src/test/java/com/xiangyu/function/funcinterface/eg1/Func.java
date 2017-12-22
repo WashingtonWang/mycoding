@@ -1,7 +1,11 @@
 package com.xiangyu.function.funcinterface.eg1;
 
+/**
+ * 函数接口
+ * default
+ */
 @FunctionalInterface
-public interface Func extends com.xiangyu.function.eg1.NonFunc {
+public interface Func extends NonFunc {
     void fun();
 
     default void foo(){
