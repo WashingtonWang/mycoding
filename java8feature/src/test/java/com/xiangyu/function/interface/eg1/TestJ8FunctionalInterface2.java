@@ -13,7 +13,7 @@ public class TestJ8FunctionalInterface2 {
         System.out.println("A customed method reference.");
     }
 
-    public void test(int x, Func func){
+    public void test(int x, com.xiangyu.function.eg1.Func func){
         System.out.println(x);
         func.fun();
     }

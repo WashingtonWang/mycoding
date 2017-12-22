@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
+ * @Description:
  * user: xiangyu.wang
  * date: 2017/12/22 14:44
  */
