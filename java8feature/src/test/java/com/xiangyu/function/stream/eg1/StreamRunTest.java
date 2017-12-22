@@ -18,8 +18,8 @@ public class StreamRunTest {
         //String [] strArray = new String[] {"a", "b", "c"};
         //Arrays.stream(strArray).forEach(o -> System.out.println(o.toString()));
         //Stream s = Stream.of(strArray);
-        //List<String> list = Arrays.asList(strArray);
-        //Stream stream = list.stream();
+        //List<String> collection = Arrays.asList(strArray);
+        //Stream stream = collection.stream();
         //stream.forEach(e -> System.out.println(e.toString()));
         //IntStream.of(new int[]{1,2,3}).forEach(System.out::println);
         //IntStream.range(1,4).forEach(System.out::println);
