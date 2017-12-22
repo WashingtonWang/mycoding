@@ -38,7 +38,7 @@ public class StreamEg2 {
         Map<String,Artist> map = artists.stream()
                 .collect(Collectors.toMap(Artist::getName, artist -> artist));
 
-        //Collection  //list set map 等集合的上层接口 实现Iterable 接口
+        //Collection  //collection set map 等集合的上层接口 实现Iterable 接口
         //Collectors  //stream集合类  包括常用的一些如toList toSet方法
         //Collector   //stream的接口
         Supplier<Runnable> c = () -> () -> {
