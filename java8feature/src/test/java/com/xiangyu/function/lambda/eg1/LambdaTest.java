@@ -1,14 +1,7 @@
-package com.xiangyu.lambda.eg1;
+package com.xiangyu.function.lambda.eg1;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
-import java.util.PrimitiveIterator;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class LambdaTest {

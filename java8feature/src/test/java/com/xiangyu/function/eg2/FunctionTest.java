@@ -1,9 +1,5 @@
 package com.xiangyu.function.eg2;
 
-import com.xiangyu.function.eg1.Func;
-
-import javax.naming.BinaryRefAddr;
-import javax.sound.midi.Soundbank;
 import java.util.function.*;
 
 public class FunctionTest {

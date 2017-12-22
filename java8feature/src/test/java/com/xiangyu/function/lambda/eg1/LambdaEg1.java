@@ -1,13 +1,8 @@
-package com.xiangyu.lambda.eg1;
+package com.xiangyu.function.lambda.eg1;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Spliterator;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class LambdaEg1 {
     Runnable r1 = () -> {

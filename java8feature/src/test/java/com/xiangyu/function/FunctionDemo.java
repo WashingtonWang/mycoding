@@ -1,7 +1,6 @@
 package com.xiangyu.function;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * Created by xiangyu.wang on 2017/7/31.

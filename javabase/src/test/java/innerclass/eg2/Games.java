@@ -1,7 +1,5 @@
 package innerclass.eg2;
 
-import sun.plugin2.main.server.WindowsHelper;
-
 /**
  * user: xiangyu.wang
  * date: 2017/12/8 18:30
