@@ -1,6 +1,6 @@
-package com.xiangyu.function.eg1;
+package com.xiangyu.function.funcinterface.eg1;
 
-public class TestJ8FunctionalInterface implements com.xiangyu.function.eg1.Func {
+public class TestJ8FunctionalInterface implements Func {
     @Override
     public void fun() {
         System.out.println("fun");
@@ -17,7 +17,7 @@ public class TestJ8FunctionalInterface implements com.xiangyu.function.eg1.Func 
     }
 
     public static void main(String[] args){
-        com.xiangyu.function.eg1.Func func = new TestJ8FunctionalInterface();
+        Func func = new TestJ8FunctionalInterface();
         func.foo();
         func.fun();
         func.voo();
