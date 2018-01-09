@@ -1,4 +1,4 @@
-package com.xiangyu.function.eg2;
+package com.xiangyu.function.funcinterface.eg2;
 
 import java.util.function.*;
 

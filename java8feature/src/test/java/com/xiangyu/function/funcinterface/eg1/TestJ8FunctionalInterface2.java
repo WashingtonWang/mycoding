@@ -1,4 +1,4 @@
-package com.xiangyu.function.eg1;
+package com.xiangyu.function.funcinterface.eg1;
 
 public class TestJ8FunctionalInterface2 {
 
