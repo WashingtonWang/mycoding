@@ -43,6 +43,7 @@
         <module>springbootlearn</module>
         <module>designpatterns</module>
         <module>mybatis-pagehelper</module>
+        <module>springframework-base-learn</module>
     </modules>
 
     <dependencyManagement>
