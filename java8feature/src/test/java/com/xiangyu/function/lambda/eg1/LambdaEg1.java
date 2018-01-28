@@ -43,9 +43,9 @@ public class LambdaEg1 {
          * lambda 表达式对 值 封闭，对 变量 开放的原文是：lambda expressions close over values, not variables
          * 在这里增加一个例子以说明这个特性：
          *   int sum = 0;
-             list.forEach(e -> { sum += e.size(); }); // Illegal, close over values
+             collection.forEach(e -> { sum += e.size(); }); // Illegal, close over values
              List<Integer> aList = new List<>();
-             list.forEach(e -> { aList.add(e); }); // Legal, open over variables
+             collection.forEach(e -> { aList.add(e); }); // Legal, open over variables
          */
     }
 }
