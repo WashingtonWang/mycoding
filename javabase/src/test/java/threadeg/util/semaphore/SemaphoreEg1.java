@@ -1,4 +1,4 @@
-package threadeg.util.Semaphore;
+package threadeg.util.semaphore;
 
 import java.util.concurrent.Semaphore;
 
