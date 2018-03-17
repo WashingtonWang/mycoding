@@ -26,13 +26,19 @@ public interface MapImitate<K, V> {
 
     V removeIm(Object k);
 
-    void putAllIm(MapImitate<? extends K, ? super V> m);
+    void putAllIm(MapImitate<? extends K, ? extends V> m);
+
+    void clearIm();
 
     Set<K> keySetIm();
 
     Collection<V> valuesIm();
 
     Set<MapImitate.EntryIm<K, V>> entrySetIm();
+
+    boolean equals(Object o);
+
+    int hashCode();
 
     interface EntryIm<K, V> {
         K getKeyIm();
