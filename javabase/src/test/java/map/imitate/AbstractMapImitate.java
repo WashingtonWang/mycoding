@@ -1,6 +1,5 @@
 package map.imitate;
 
-import java.awt.image.Kernel;
 import java.io.Serializable;
 import java.util.*;
 
@@ -8,9 +7,9 @@ import java.util.*;
  * user: xiangyu.wang
  * date: 2018/3/16 17:26
  */
-public abstract class AbstractMapIm<K, V> implements MapImitate<K, V> {
+public abstract class AbstractMapImitate<K, V> implements MapImitate<K, V> {
 
-    protected AbstractMapIm() {
+    protected AbstractMapImitate() {
     }
 
     public int seizeIm() {
@@ -149,16 +148,16 @@ public abstract class AbstractMapIm<K, V> implements MapImitate<K, V> {
                 }
                 @Override
                 public int size() {
-                    return AbstractMapIm.this.seizeIm();
+                    return AbstractMapImitate.this.seizeIm();
                 }
                 public boolean isEmpty(){
-                    return AbstractMapIm.this.isEmptyIm();
+                    return AbstractMapImitate.this.isEmptyIm();
                 }
                 public void clear(){
-                    AbstractMapIm.this.clearIm();
+                    AbstractMapImitate.this.clearIm();
                 }
                 public boolean contains(Object k){
-                    return AbstractMapIm.this.containsKeyIm(k);
+                    return AbstractMapImitate.this.containsKeyIm(k);
                 }
             };
             keySet = ks;
@@ -192,16 +191,16 @@ public abstract class AbstractMapIm<K, V> implements MapImitate<K, V> {
 
                 @Override
                 public int size() {
-                    return AbstractMapIm.this.sizeIm();
+                    return AbstractMapImitate.this.sizeIm();
                 }
                 public boolean isEmpty(){
-                    return AbstractMapIm.this.isEmptyIm();
+                    return AbstractMapImitate.this.isEmptyIm();
                 }
                 public void clear(){
-                    AbstractMapIm.this.clearIm();
+                    AbstractMapImitate.this.clearIm();
                 }
                 public boolean contains(Object k){
-                    return AbstractMapIm.this.containsKeyIm(k);
+                    return AbstractMapImitate.this.containsKeyIm(k);
                 }
             };
             values = vals;
@@ -275,7 +274,7 @@ public abstract class AbstractMapIm<K, V> implements MapImitate<K, V> {
     }
 
     protected Object clone() throws CloneNotSupportedException{
-        AbstractMapIm<?, ?> result = (AbstractMapIm<?, ?>) super.clone();
+        AbstractMapImitate<?, ?> result = (AbstractMapImitate<?, ?>) super.clone();
         result.keySet = null;
         result.values = null;
         return result;
@@ -303,18 +302,89 @@ public abstract class AbstractMapIm<K, V> implements MapImitate<K, V> {
 
         @Override
         public K getKeyIm() {
-            return null;
+            return key;
         }
 
         @Override
         public V getValueIm() {
-            return null;
+            return value;
         }
 
         @Override
         public V setValueIm(V value) {
-            return null;
+            V oldValue = this.value;
+            this.value = value;
+            return oldValue;
+        }
+
+        public boolean equals(Object o){
+            if (!(o instanceof MapImitate.EntryIm)){
+                return false;
+            }
+            MapImitate.EntryIm<?, ?> e = (EntryIm<?, ?>) o;
+            return eqIm(key, e.getKeyIm()) && eqIm(value, e.getValueIm());
+        }
+
+        public int hashCode(){
+            return (key == null ? 0 : key.hashCode()) ^
+                    (value == null ? 0 : value.hashCode());
+        }
+
+        @Override
+        public String toString() {
+            return key + "=" + value;
         }
     }
+
+    public static class SimpleImmutableEntryIm<K, V> implements EntryIm<K, V>, Serializable{
+
+        private static final long serialVersionUID = 3741715361012805306L;
+
+        private final K key;
+        private final V value;
+
+        public SimpleImmutableEntryIm(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public SimpleImmutableEntryIm(EntryIm<? extends K, ? extends V> entryIm){
+            this.key = entryIm.getKeyIm();
+            this.value = entryIm.getValueIm();
+        }
+
+        @Override
+        public K getKeyIm() {
+            return key;
+        }
+
+        @Override
+        public V getValueIm() {
+            return value;
+        }
+
+        @Override
+        public V setValueIm(V value) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean equals(Object o){
+            if ( !(o instanceof MapImitate.EntryIm)){
+                return false;
+            }
+            MapImitate.EntryIm<?, ?> e = (EntryIm<?, ?>) o;
+            return eqIm(key, e.getKeyIm()) && eqIm(value, e.getValueIm());
+        }
+
+        public int hashCode(){
+            return (key == null ? 0 : key.hashCode()) ^
+                    (value == null ?  0 : value.hashCode());
+        }
+
+        public String toString(){
+            return key + "=" + value;
+        }
+    }
+
 
 }
