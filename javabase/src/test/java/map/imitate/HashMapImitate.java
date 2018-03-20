@@ -1,10 +1,14 @@
 package map.imitate;
 
+import sun.reflect.generics.tree.Tree;
+
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * user: xiangyu.wang
@@ -218,15 +222,51 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
         threshold = newThr;
         @SuppressWarnings({"rawtypes", "unchecked"})
-        NodeIm<K, V>[] newTab = (NodeIm<K, V>[])new NodeIm[newCap];
+        NodeIm<K, V>[] newTab = (NodeIm<K, V>[]) new NodeIm[newCap];
         table = newTab;
-        if (oldTab != null){
-            for (int j = 0; j < oldCap; j++){
+        if (oldTab != null) {
+            for (int j = 0; j < oldCap; j++) {
                 NodeIm<K, V> e;
-                if ((e = oldTab[j]) != null){
+                if ((e = oldTab[j]) != null) {
                     oldTab[j] = null;
                     if (e.next == null)
                         newTab[e.hash & (newCap - 1)] = e;
+                    else if (e instanceof TreeNo)
+                }
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    // Tree bins
+    static final class TreeNodeIm<K, V> extends LinkedHashMapImitate.EntryIm<K, V> {
+        TreeNodeIm<K, V> parent;
+        TreeNodeIm<K, V> left;
+        TreeNodeIm<K, V> right;
+        TreeNodeIm<K, V> prev;
+        boolean red;
+
+        TreeNodeIm(int hash, K key, V val, NodeIm<K, V> next) {
+            super(hash, key, val, next);
+        }
+
+        final TreeNodeIm<K, V> root() {
+            for (TreeNodeIm<K, V> r = this, p; ; ) {
+                if ((p = r.parent) == null)
+                    return r;
+                r = p;
+            }
+        }
+
+        static <K, V> void moveRootToFrontIm(NodeIm<K, V>[] tab, TreeNodeIm<K, V> root) {
+            int n;
+            if (root != null && tab != null && (n   = tab.length) > 0) {
+                int index = (n - 1) & root.hash;
+                TreeNodeIm<K, V> first = (TreeNodeIm<K, V>) tab[index];
+                if (root != first){
+                    NodeIm<K, V> rn;
+                    tab[index] = root;
+
                 }
             }
         }
