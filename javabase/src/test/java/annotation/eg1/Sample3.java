@@ -1,4 +1,4 @@
-package annotationeg.eg1;
+package annotation.eg1;
 
 import java.util.ArrayList;
 import java.util.List;

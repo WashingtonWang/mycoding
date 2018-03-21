@@ -260,15 +260,40 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
 
         static <K, V> void moveRootToFrontIm(NodeIm<K, V>[] tab, TreeNodeIm<K, V> root) {
             int n;
-            if (root != null && tab != null && (n   = tab.length) > 0) {
+            if (root != null && tab != null && (n = tab.length) > 0) {
                 int index = (n - 1) & root.hash;
                 TreeNodeIm<K, V> first = (TreeNodeIm<K, V>) tab[index];
-                if (root != first){
+                if (root != first) {
                     NodeIm<K, V> rn;
                     tab[index] = root;
-
+                    TreeNodeIm<K, V> rp = root.prev;
+                    if ((rn = root.next) != null)
+                        ((TreeNodeIm<K, V>) rn).prev = rp;
+                    if (rp != null)
+                        rp.next = rn;
+                    if (first != null)
+                        first.prev = root;
+                    root.next = first;
+                    root.next = null;
                 }
+                checkInvariantsIm
             }
+        }
+
+        static <K, V> boolean checkInvariantsIm(TreeNodeIm<K, V> t){
+            TreeNodeIm<K, V> tp = t.parent, tl = t.left, tr = t.right,
+                    tb = t.prev, tn = (TreeNodeIm<K, V>) t.next;
+            if (tb != null && tb.next != t)
+                return false;
+            if (tn != null && tn.prev != t)
+                return false;
+            if (tp != null && t != tp.left && t != tp.right)
+                return false;
+            if (tl != null && (tl.parent != t) || (tl.hash > t.hash))
+                return false;
+            if (tr != null && (tr.parent != t) || (tr.hash < t.hash))
+                return false;
+
         }
     }
 }

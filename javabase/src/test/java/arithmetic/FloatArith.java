@@ -1,4 +1,4 @@
-package arithmeticeg;
+package arithmetic;
 
 import java.math.BigDecimal;
 

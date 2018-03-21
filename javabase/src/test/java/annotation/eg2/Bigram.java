@@ -1,4 +1,4 @@
-package annotationeg.eg2;
+package annotation.eg2;
 
 import java.util.HashSet;
 import java.util.Set;

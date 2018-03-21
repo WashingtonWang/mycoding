@@ -1,4 +1,4 @@
-package annotationeg.eg1;
+package annotation.eg1;
 
 public class Sample2 {
     @ExceptionTest(ArithmeticException.class)
