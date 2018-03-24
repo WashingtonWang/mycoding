@@ -1,7 +1,9 @@
 package map.imitate;
 
+import sun.nio.ch.Net;
 import sun.reflect.generics.tree.Tree;
 
+import javax.swing.tree.TreeNode;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -250,7 +252,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             super(hash, key, val, next);
         }
 
-        final TreeNodeIm<K, V> root() {
+        final TreeNodeIm<K, V> rootIm() {
             for (TreeNodeIm<K, V> r = this, p; ; ) {
                 if ((p = r.parent) == null)
                     return r;
@@ -276,12 +278,84 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                     root.next = first;
                     root.next = null;
                 }
-                checkInvariantsIm
+                assert checkInvariantsIm(root);
             }
         }
 
-        static <K, V> boolean checkInvariantsIm(TreeNodeIm<K, V> t){
-            TreeNodeIm<K, V> tp = t.parent, tl = t.left, tr = t.right,
+        final TreeNodeIm<K, V> findIm(int h, Object k, Class<?> kc) {
+            TreeNodeIm<K, V> p = this;
+            do {
+                int ph, dir = 0;
+                K pk;
+                TreeNodeIm<K, V> pl = p.left, pr = p.right, q;
+                if ((ph = p.hash) > h)
+                    p = pl;
+                else if (ph < h)
+                    p = pr;
+                else if ((pk = p.key) == k || (k != null && k.equals(pk)))
+                    return p;
+                else if (pl == null)
+                    p = pr;
+                else if (pr == null)
+                    p = pl;
+                else if (kc != null || ((kc = comparableClassForIm(k)) != null) &&
+                        (dir = compareComparablesIm(kc, k, pk)) != 0)
+                    p = (dir < 0) ? pl : pr;
+                else if ((q = pr.findIm(h, k, kc)) != null)
+                    return q;
+                else
+                    p = pl;
+            } while (p != null);
+            return null;
+        }
+
+        final TreeNodeIm<K, V> getTreeNodeIm(int h, Object k) {
+            return ((parent != null) ? rootIm() : this).findIm(h, k, null);
+        }
+
+        static int tieBreakOrder(Object a, Object b) {
+            int d;
+            if (a == null || b == null || (d = a.getClass().getName().
+                    compareTo(b.getClass().getName())) == 0)
+                d = (System.identityHashCode(a) <= System.identityHashCode(b) ? -1 : 1);
+            return d;
+        }
+
+        final void treeifyIm(NodeIm<K, V>[] tab) {
+            TreeNodeIm<K, V> root = null;
+            for (TreeNodeIm<K, V> x = this, next; x != null; x = next) {
+                next = (TreeNodeIm<K, V>) x.next;
+                x.left = x.right = null;
+                if (root == null) {
+                    x.parent = null;
+                    x.red = false;
+                    root = x;
+                } else {
+                    K k = x.key;
+                    int h = x.hash;
+                    Class<?> kc = null;
+                    for (TreeNodeIm<K, V> p = root; ; ) {
+                        int dir, ph;
+                        K pk = p.key;
+                        if ((ph = p.hash) > h)
+                            dir = -1;
+                        else if(ph < h)
+                            dir = 1;
+                        else if((kc == null && (kc = comparableClassForIm(k)) == null) ||
+                                (dir = compareComparablesIm(kc, k, pk)) == 0)
+                            dir = tieBreakOrder(k, pk);
+                        TreeNodeIm<K, V> xp =  p;
+                        if ((p = (dir <= 0) ? p.left : p.right) == null){
+                            x.parent = xp;
+                        }
+                    }
+                }
+            }
+        }
+
+        static <K, V> boolean checkInvariantsIm(TreeNodeIm<K, V> t) {
+            TreeNodeIm<K, V> tp = t.parent,
+                    tl = t.left, tr = t.right,
                     tb = t.prev, tn = (TreeNodeIm<K, V>) t.next;
             if (tb != null && tb.next != t)
                 return false;
@@ -293,7 +367,13 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                 return false;
             if (tr != null && (tr.parent != t) || (tr.hash < t.hash))
                 return false;
-
+            if (t.red && tl != null && tl.red && tr != null && tr.red)
+                return false;
+            if (tl != null && !checkInvariantsIm(tl))
+                return false;
+            if (tr != null && !checkInvariantsIm(tr))
+                return false;
+            return true;
         }
     }
 }
