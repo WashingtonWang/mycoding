@@ -1,4 +1,4 @@
-package map.imitate;
+package imitate.javautil;
 
 import java.io.Serializable;
 import java.util.*;

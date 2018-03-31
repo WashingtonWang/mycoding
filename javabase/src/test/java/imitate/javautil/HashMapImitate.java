@@ -1,16 +1,10 @@
-package map.imitate;
+package imitate.javautil;
 
-import sun.nio.ch.Net;
-import sun.reflect.generics.tree.Tree;
-
-import javax.swing.tree.TreeNode;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * user: xiangyu.wang
@@ -239,6 +233,14 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
     }
 
+    NodeIm<K, V> replacementNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
+        return new NodeIm<>(p.hash, p.key, p.value, next);
+    }
+
+    TreeNodeIm<K, V> newTreeNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
+        return new TreeNodeIm<>(hash, key, value, next);
+    }
+
     /* ------------------------------------------------------------ */
     // Tree bins
     static final class TreeNodeIm<K, V> extends LinkedHashMapImitate.EntryIm<K, V> {
@@ -313,7 +315,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             return ((parent != null) ? rootIm() : this).findIm(h, k, null);
         }
 
-        static int tieBreakOrder(Object a, Object b) {
+        static int tieBreakOrderIm(Object a, Object b) {
             int d;
             if (a == null || b == null || (d = a.getClass().getName().
                     compareTo(b.getClass().getName())) == 0)
@@ -339,18 +341,201 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                         K pk = p.key;
                         if ((ph = p.hash) > h)
                             dir = -1;
-                        else if(ph < h)
+                        else if (ph < h)
                             dir = 1;
-                        else if((kc == null && (kc = comparableClassForIm(k)) == null) ||
+                        else if ((kc == null && (kc = comparableClassForIm(k)) == null) ||
                                 (dir = compareComparablesIm(kc, k, pk)) == 0)
-                            dir = tieBreakOrder(k, pk);
-                        TreeNodeIm<K, V> xp =  p;
-                        if ((p = (dir <= 0) ? p.left : p.right) == null){
+                            dir = tieBreakOrderIm(k, pk);
+                        TreeNodeIm<K, V> xp = p;
+                        if ((p = (dir <= 0) ? p.left : p.right) == null) {
                             x.parent = xp;
+                            if (dir <= 0)
+                                xp.left = x;
+                            else
+                                xp.right = x;
+                            root = balanceInsertionIm(root, x);
+                            break;
                         }
                     }
                 }
             }
+            moveRootToFrontIm(tab, root);
+        }
+
+        final NodeIm<K, V> untreeifyIm(HashMapImitate<K, V> map) {
+            NodeIm<K, V> hd = null, tl = null;
+            for (NodeIm<K, V> q = this; q != null; q = q.next) {
+                NodeIm<K, V> p = map.replacementNodeIm(q, null);
+                if (tl == null)
+                    hd = p;
+                else
+                    tl.next = p;
+                tl = p;
+            }
+            return hd;
+        }
+
+        final TreeNodeIm<K, V> putTreeValIm(HashMapImitate<K, V> map, NodeIm<K, V>[] tab,
+                                            int h, K k, V v) {
+            Class<?> kc = null;
+            boolean searched = false;
+            TreeNodeIm<K, V> root = (parent != null) ? rootIm() : this;
+            for (TreeNodeIm<K, V> p = root; ; ) {
+                int dir, ph;
+                K pk;
+                if ((ph = p.hash) > h)
+                    dir = -1;
+                else if (ph < h)
+                    dir = 1;
+                else if ((pk = p.key) == k || (k != null) && k.equals(pk))
+                    return p;
+                else if ((kc == null) && (kc = comparableClassForIm(k)) == null ||
+                        (dir = compareComparablesIm(kc, k, pk)) == 0) {
+                    if (!searched) {
+                        TreeNodeIm<K, V> q, ch;
+                        searched = true;
+                        if (((ch = p.left) != null && (q = ch.findIm(h, k, kc)) != null) ||
+                                ((ch = p.right) != null && (q = ch.findIm(h, k, kc)) != null))
+                            return q;
+                    }
+                    dir = tieBreakOrderIm(k, pk);
+                }
+
+                TreeNodeIm<K, V> xp = p;
+                if ((p = (dir <= 0) ? p.left : p.right) == null) {
+                    NodeIm<K, V> xpn = xp.next;
+                    TreeNodeIm<K, V> x = map.newTreeNodeIm(h, k, v, xpn);
+                    if (dir <= 0)
+                        xp.left = x;
+                    else
+                        xp.right = x;
+                    xp.next = x;
+                    x.parent = x.prev = xp;
+                    if (xpn != null)
+                        ((TreeNodeIm<K, V>) xpn).prev = x;
+                    moveRootToFrontIm(tab, balanceInsertionIm(root, x));
+                    return null;
+                }
+            }
+        }
+
+        final void removeTreeNodeIm(HashMapImitate<K, V> map, NodeIm<K, V>[] tab, boolean movable) {
+            int n;
+            if (tab == null || (n = tab.length) == 0)
+                return;
+            int index = (n - 1) & hash;
+            TreeNodeIm<K, V> first = (TreeNodeIm<K, V>) tab[index], root = first, rl;
+            TreeNodeIm<K, V> succ = (TreeNodeIm<K, V>) next, pred = prev;
+            if (pred == null)
+                tab[index] = first = succ;
+            else
+                pred.next = succ;
+            if (succ != null)
+                succ.prev = pred;
+            if (first == null)
+                return;
+            if (root.parent != null)
+                root = root.rootIm();
+            if (root == null || root.right == null || (rl = root.left) == null || rl.left == null){
+                tab[index] = first.untreeifyIm(map);
+                return;
+            }
+            TreeNodeIm<K, V> p = this, pl = left, pr = right, replacement;
+            if (pl != null && pr != null){
+                TreeNodeIm<K, V> s = pr, sl;
+                while ((sl = s.left) != null)
+                    s = sl;
+                boolean c = s.red; s.red = p.red;p.red = c;
+                TreeNodeIm<K, V> sr = s.right;
+                TreeNodeIm<K, V> pp = p.parent;
+                if (s == pr){
+
+                }
+            }
+        }
+
+        static <K, V> TreeNodeIm<K, V> balanceInsertionIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> x) {
+            x.red = true;
+            for (TreeNodeIm<K, V> xp, xpp, xppl, xppr; ; ) {
+                if ((xp = x.parent) == null) {
+                    x.red = false;
+                    return x;
+                } else if (!xp.red || (xpp = xp.parent) == null)
+                    return root;
+                if (xp == (xppl = xpp.left)) {
+                    if ((xppr = xpp.right) != null && xppr.red) {
+                        xppr.red = false;
+                        xp.red = false;
+                        xpp.red = true;
+                        x = xpp;
+                    } else {
+                        if (x == xp.right) {
+                            root = rotateLeftIm(root, x = xp);
+                            xpp = (xp = x.parent) == null ? null : xp.parent;
+                        }
+                        if (xp != null) {
+                            xp.red = false;
+                            if (xpp != null) {
+                                xpp.red = true;
+                                root = rotateRightIm(root, xpp);
+                            }
+                        }
+                    }
+                } else {
+                    if (xppl != null && xppl.red) {
+                        xppl.red = false;
+                        xp.red = false;
+                        xpp.red = true;
+                        x = xpp;
+                    } else {
+                        if (x == xp.left) {
+                            root = rotateRightIm(root, x = xp);
+                            xpp = (xp = x.parent) == null ? null : xp.parent;
+                        }
+                        if (xp != null) {
+                            xp.red = false;
+                            if (xpp != null) {
+                                xpp.red = true;
+                                root = rotateLeftIm(root, xpp);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        static <K, V> TreeNodeIm<K, V> rotateLeftIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> p) {
+            TreeNodeIm<K, V> r, pp, rl;
+            if (p != null && (r = p.right) != null) {
+                if ((rl = p.right = r.left) != null)
+                    rl.parent = p;
+                if ((pp = r.parent = p.parent) == null)
+                    (root = r).red = false;
+                else if (pp.left == p)
+                    pp.left = r;
+                else
+                    pp.right = r;
+                r.left = p;
+                p.parent = r;
+            }
+            return root;
+        }
+
+        static <K, V> TreeNodeIm<K, V> rotateRightIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> p) {
+            TreeNodeIm<K, V> l, pp, lr;
+            if (p != null && (l = p.left) != null) {
+                if ((lr = p.left = l.right) != null)
+                    lr.parent = p;
+                if ((pp = l.parent = p.parent) == null)
+                    (root = l).red = false;
+                else if (pp.right == p)
+                    pp.right = l;
+                else
+                    pp.left = l;
+                l.right = p;
+                p.parent = l;
+            }
+            return root;
         }
 
         static <K, V> boolean checkInvariantsIm(TreeNodeIm<K, V> t) {

@@ -1,4 +1,4 @@
-package map.imitate;
+package imitate.javautil;
 
 /**
  * user: xiangyu.wang
