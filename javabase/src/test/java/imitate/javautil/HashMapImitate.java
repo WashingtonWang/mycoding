@@ -1,5 +1,7 @@
 package imitate.javautil;
 
+import sun.reflect.generics.tree.Tree;
+
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -436,22 +438,66 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                 return;
             if (root.parent != null)
                 root = root.rootIm();
-            if (root == null || root.right == null || (rl = root.left) == null || rl.left == null){
+            if (root == null || root.right == null || (rl = root.left) == null || rl.left == null) {
                 tab[index] = first.untreeifyIm(map);
                 return;
             }
             TreeNodeIm<K, V> p = this, pl = left, pr = right, replacement;
-            if (pl != null && pr != null){
+            if (pl != null && pr != null) {
                 TreeNodeIm<K, V> s = pr, sl;
                 while ((sl = s.left) != null)
                     s = sl;
-                boolean c = s.red; s.red = p.red;p.red = c;
+                boolean c = s.red;
+                s.red = p.red;
+                p.red = c;
                 TreeNodeIm<K, V> sr = s.right;
                 TreeNodeIm<K, V> pp = p.parent;
-                if (s == pr){
-
+                if (s == pr) {
+                    p.parent = s;
+                    s.right = p;
+                } else {
+                    TreeNodeIm<K, V> sp = s.parent;
+                    if ((p.parent = sp) != null) {
+                        if (s == sp.left)
+                            sp.left = p;
+                        else
+                            sp.right = p;
+                    }
+                    if ((s.right = pr) != null)
+                        pr.parent = s;
                 }
+                p.left = null;
+                if ((p.right = sr) != null)
+                    sr.right = p;
+                if ((s.left = pl) != null)
+                    pl.parent = s;
+                if ((s.parent = pp) != null)
+                    root = s;
+                else if (p == pp.left)
+                    pp.left = s;
+                else
+                    pp.right = s;
+                if (sr != null)
+                    replacement = sr;
+                else
+                    replacement = p;
+            } else if (pl != null)
+                replacement = pl;
+            else if (pr != null)
+                replacement = pr;
+            else
+                replacement = p;
+            if (replacement != p) {
+                TreeNodeIm<K, V> pp = replacement.parent = p.parent;
+                if (pp == null)
+                    root = replacement;
+                else if (p == pp.left)
+                    pp.left = replacement;
+                else
+                    pp.right = replacement;
+                p.left = p.right = p.parent = null;
             }
+            TreeNodeIm<K, V> r = p.red ? root : balanceDeletion(root, replacement);
         }
 
         static <K, V> TreeNodeIm<K, V> balanceInsertionIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> x) {
@@ -502,6 +548,47 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                     }
                 }
             }
+        }
+
+        static <K, V> TreeNodeIm<K, V> balanceDeletionIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> x) {
+            for (TreeNodeIm<K, V> xp, xpl, xpr; ; ) {
+                if (x == null || x == root)
+                    return root;
+                else if ((xp = x.parent) == null) {
+                    x.red = false;
+                    return x;
+                } else if (x.red) {
+                    x.red = false;
+                    return root;
+                } else if ((xpl = xp.left) == x) {
+                    if ((xpr = xp.right) != null && xpr.red) {
+                        xpr.red = false;
+                        xp.red = true;
+                        root = rotateLeftIm(root, xp);
+                        xpr = (xp = x.parent) == null ? null : xp.right;
+                    }
+                    if (xpr == null)
+                        x = xp;
+                    else {
+                        TreeNodeIm<K, V> sl = xpr.left, sr = xpr.right;
+                        if ((sr == null || !sr.red) && (sl == null || !sl.red)){
+                            xpr.red = true;
+                            x = xp;
+                        }else{
+                            if (sr == null || !sr.red){
+                                if (sl != null)
+                                    sl.red = false;
+                                xpr.red = true;
+                                root = rotateRightIm(root, xpr);
+                                xpr = (xp = x.parent) == null ? null : xp.right;
+                            }
+                            if (xpr != null){
+                                xpr.red = (xp == null) ?
+                            }
+                        }
+                    }
+                }
+            }g
         }
 
         static <K, V> TreeNodeIm<K, V> rotateLeftIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> p) {
