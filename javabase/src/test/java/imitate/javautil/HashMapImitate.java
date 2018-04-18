@@ -583,12 +583,12 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                                 xpr = (xp = x.parent) == null ? null : xp.right;
                             }
                             if (xpr != null){
-                                xpr.red = (xp == null) ?
+                                xpr.red = (xp == null) ? false : xp.red;
                             }
                         }
                     }
                 }
-            }g
+            }
         }
 
         static <K, V> TreeNodeIm<K, V> rotateLeftIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> p) {
