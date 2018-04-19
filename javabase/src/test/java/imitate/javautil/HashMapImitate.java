@@ -229,7 +229,30 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                     oldTab[j] = null;
                     if (e.next == null)
                         newTab[e.hash & (newCap - 1)] = e;
-                    else if (e instanceof TreeNo)
+                    else if (e instanceof TreeNodeIm)
+                        ((TreeNodeIm<K, V>)e).splitIm(this, newTab, j, oldCap);
+                    else {
+                        NodeIm<K, V> loHead = null, loTail = null;
+                        NodeIm<K, V> hiHead = null, hiTail = null;
+                        NodeIm<K, V> next;
+                        do {
+                            next = e.next;
+                            if ((e.hash & oldCap) == 0){
+                                if (loTail == null)
+                                    loHead = e;
+                                else
+                                    loTail.next = e;
+                                loTail = e;
+                            } else {
+                                if (hiTail == null)
+                                    hiHead = e;
+                                else
+                                    hiTail.next = e;
+                                hiTail = e;
+                            }
+                        } while ((e = next) != null);
+
+                    }
                 }
             }
         }
@@ -497,7 +520,24 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                     pp.right = replacement;
                 p.left = p.right = p.parent = null;
             }
-            TreeNodeIm<K, V> r = p.red ? root : balanceDeletion(root, replacement);
+            TreeNodeIm<K, V> r = p.red ? root : balanceDeletionIm(root, replacement);
+            if (replacement == p) {
+                TreeNodeIm<K, V> pp = p.parent;
+                p.parent = null;
+                if (pp != null) {
+                    if (p == pp.left)
+                        pp.left = null;
+                    else if (p == pp.right)
+                        pp.right = null;
+                }
+            }
+            if (movable)
+                moveRootToFrontIm(tab, r);
+        }
+
+        final void splitIm(HashMapImitate<K, V> map, NodeIm<K, V>[] tab, int index, int bit){
+            //todo
+            TreeNodeIm<K, V> b = this;
         }
 
         static <K, V> TreeNodeIm<K, V> balanceInsertionIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> x) {
@@ -571,20 +611,61 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                         x = xp;
                     else {
                         TreeNodeIm<K, V> sl = xpr.left, sr = xpr.right;
-                        if ((sr == null || !sr.red) && (sl == null || !sl.red)){
+                        if ((sr == null || !sr.red) && (sl == null || !sl.red)) {
                             xpr.red = true;
                             x = xp;
-                        }else{
-                            if (sr == null || !sr.red){
+                        } else {
+                            if (sr == null || !sr.red) {
                                 if (sl != null)
                                     sl.red = false;
                                 xpr.red = true;
                                 root = rotateRightIm(root, xpr);
                                 xpr = (xp = x.parent) == null ? null : xp.right;
                             }
-                            if (xpr != null){
+                            if (xpr != null) {
                                 xpr.red = (xp == null) ? false : xp.red;
+                                if ((sr = xpr.right) != null)
+                                    sr.red = false;
                             }
+                            if (xp != null) {
+                                xp.red = false;
+                                root = rotateLeftIm(root, xp);
+                            }
+                            x = root;
+                        }
+                    }
+                } else {
+                    if (xpl != null && xpl.red) {
+                        xpl.red = false;
+                        xp.red = true;
+                        root = rotateRightIm(root, xp);
+                        xpl = (xp = xp.parent) == null ? null : xp.left;
+                    }
+                    if (xpl == null)
+                        x = xp;
+                    else {
+                        TreeNodeIm<K, V> sl = xpl.left, sr = xpl.right;
+                        if ((sl == null || !sl.red) && (sr == null || !sr.red)) {
+                            xpl.red = true;
+                            x = xp;
+                        } else {
+                            if (sl == null || !sl.red) {
+                                if (sr != null)
+                                    sr.red = false;
+                                xpl.red = true;
+                                root = rotateLeftIm(root, xpl);
+                                xpl = (xp = xp.parent) == null ? null : xp.left;
+                            }
+                            if (xpl != null) {
+                                xpl.red = (xp == null) ? false : xp.red;
+                                if ((sl = xpl.left) != null)
+                                    sl.red = false;
+                            }
+                            if (xp != null) {
+                                xp.red = false;
+                                root = rotateRightIm(root, xp);
+                            }
+                            x = root;
                         }
                     }
                 }
