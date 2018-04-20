@@ -1,7 +1,5 @@
 package imitate.javautil;
 
-import sun.reflect.generics.tree.Tree;
-
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -195,6 +193,19 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         return null;
     }
 
+    final V putValIm(int hash, K key, V value, boolean onlyIfAbsent, boolean evict){
+        NodeIm<K, V>[] tab; NodeIm<K, V> p; int n, i;
+        if ((tab = table) == null || (n = tab.length) == 0)
+            n = (tab = resizeIm()).length;
+        if ((p = tab[i = (n - 1) & hash]) == null)
+            tab[i] = newNodeIm(hash, key, value, null);
+        else {
+            NodeIm<K, V> e; K k;
+            if (p.hash == hash && ((k = p.key) == key) || (key != null && key.equals(k)))
+                e = p;
+        }
+    }
+
     final NodeIm<K, V>[] resizeIm() {
         NodeIm<K, V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
@@ -230,14 +241,14 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                     if (e.next == null)
                         newTab[e.hash & (newCap - 1)] = e;
                     else if (e instanceof TreeNodeIm)
-                        ((TreeNodeIm<K, V>)e).splitIm(this, newTab, j, oldCap);
+                        ((TreeNodeIm<K, V>) e).splitIm(this, newTab, j, oldCap);
                     else {
                         NodeIm<K, V> loHead = null, loTail = null;
                         NodeIm<K, V> hiHead = null, hiTail = null;
                         NodeIm<K, V> next;
                         do {
                             next = e.next;
-                            if ((e.hash & oldCap) == 0){
+                            if ((e.hash & oldCap) == 0) {
                                 if (loTail == null)
                                     loHead = e;
                                 else
@@ -251,11 +262,23 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                                 hiTail = e;
                             }
                         } while ((e = next) != null);
-
+                        if (loTail != null) {
+                            loTail.next = null;
+                            newTab[j] = loHead;
+                        }
+                        if (hiTail != null) {
+                            hiTail.next = null;
+                            newTab[j + oldCap] = hiHead;
+                        }
                     }
                 }
             }
         }
+        return newTab;
+    }
+
+    NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next){
+        return new NodeIm<>(hash, key, value, next);
     }
 
     NodeIm<K, V> replacementNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
@@ -535,9 +558,48 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                 moveRootToFrontIm(tab, r);
         }
 
-        final void splitIm(HashMapImitate<K, V> map, NodeIm<K, V>[] tab, int index, int bit){
-            //todo
+        final void splitIm(HashMapImitate<K, V> map, NodeIm<K, V>[] tab, int index, int bit) {
             TreeNodeIm<K, V> b = this;
+            TreeNodeIm<K, V> loHead = null, loTail = null;
+            TreeNodeIm<K, V> hiHead = null, hiTail = null;
+            int lc = 0, hc = 0;
+            for (TreeNodeIm<K, V> e = b, next; e != null; e = next) {
+                next = (TreeNodeIm<K, V>) e.next;
+                e.next = null;
+                if ((e.hash & bit) == 0) {
+                    if ((e.prev = loTail) == null)
+                        loHead = e;
+                    else
+                        loTail.next = e;
+                    loTail = e;
+                    ++lc;
+                } else {
+                    if ((e.prev = hiTail) == null)
+                        hiHead = e;
+                    else
+                        hiTail.next = e;
+                    hiTail = e;
+                    ++hc;
+                }
+                if (loHead != null) {
+                    if (lc <= UNTREEIFY_THRESHOLD_IM)
+                        tab[index] = loHead.untreeifyIm(map);
+                    else {
+                        tab[index] = loHead;
+                        if (hiHead != null)
+                            loHead.treeifyIm(tab);
+                    }
+                }
+                if (hiHead != null) {
+                    if (hc <= UNTREEIFY_THRESHOLD_IM)
+                        tab[index + bit] = hiHead.untreeifyIm(map);
+                    else {
+                        tab[index + bit] = hiHead;
+                        if (loHead != null)
+                            hiHead.treeifyIm(tab);
+                    }
+                }
+            }
         }
 
         static <K, V> TreeNodeIm<K, V> balanceInsertionIm(TreeNodeIm<K, V> root, TreeNodeIm<K, V> x) {
