@@ -1,5 +1,7 @@
 package imitate.javautil;
 
+import sun.reflect.generics.tree.Tree;
+
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -169,7 +171,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             for (MapImitate.EntryIm<? extends K, ? extends V> e : m.entrySetIm()) {
                 K key = e.getKeyIm();
                 V value = e.getValueIm();
-                putValIm(hashIm(key), key, value, )
+                putValIm(hashIm(key), key, value, false, evict);
             }
         }
     }
@@ -183,6 +185,31 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         return size == 0;
     }
 
+    public V get(Object key) {
+        NodeIm<K, V> e;
+        return (e = getNodeIm(hashIm(key), key) == null ? null : e.value);
+    }
+
+    final NodeIm<K, V> getNodeIm(int hash, Object key) {
+        NodeIm<K, V>[] tab;
+        NodeIm<K, V> first = null, e;
+        int n;
+        K k = null;
+        if ((tab = table) != null && (n = tab.length) > 0 && (first = tab[(n - 1) & hash]) != null) {
+            if (first.hash == hash && ((k = first.key) == key) || (key != null && key.equals(k)))
+                return first;
+        }
+        if ((e = first.next) != null) {
+            if (first instanceof TreeNodeIm)
+                return ((TreeNodeIm<K, V>) first).getTreeNodeIm(hash, key);
+            do {
+                if (e.hash == hash && ((k = e.key) == key) || (key != null && key.equals(k)))
+                    return e;
+            } while ((e = e.next) != null);
+        }
+        return null;
+    }
+
     @Override
     public boolean containsKeyIm(Object key) {
         return false;
@@ -193,17 +220,47 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         return null;
     }
 
-    final V putValIm(int hash, K key, V value, boolean onlyIfAbsent, boolean evict){
-        NodeIm<K, V>[] tab; NodeIm<K, V> p; int n, i;
+    final V putValIm(int hash, K key, V value, boolean onlyIfAbsent, boolean evict) {
+        NodeIm<K, V>[] tab;
+        NodeIm<K, V> p;
+        int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
             n = (tab = resizeIm()).length;
         if ((p = tab[i = (n - 1) & hash]) == null)
             tab[i] = newNodeIm(hash, key, value, null);
         else {
-            NodeIm<K, V> e; K k;
+            NodeIm<K, V> e;
+            K k = null;
             if (p.hash == hash && ((k = p.key) == key) || (key != null && key.equals(k)))
                 e = p;
+            else if (p instanceof TreeNodeIm)
+                e = ((TreeNodeIm<K, V>) p).putTreeValIm(this, tab, hash, key, value);
+            else {
+                for (int binCount = 0; ; ++binCount) {
+                    if ((e = p.next) == null) {
+                        p.next = newNodeIm(hash, key, value, null);
+                        if (binCount >= TREEIFY_THRESHOLD_IM - 1)
+                            treeifyBinIm(tab, hash);
+                        break;
+                    }
+                    if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))))
+                        break;
+                    p = e;
+                }
+            }
+            if (e != null) {
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+                afterNodeImAccess(e);
+                return oldValue;
+            }
         }
+        ++modCount;
+        if (++size > threshold)
+            resizeIm();
+        afterNodeImInsertion(evict);
+        return null;
     }
 
     final NodeIm<K, V>[] resizeIm() {
@@ -277,7 +334,76 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         return newTab;
     }
 
-    NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next){
+    final void treeifyBinIm(NodeIm<K, V>[] tab, int hash) {
+        int n, index;
+        NodeIm<K, V> e;
+        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY_IM)
+            resizeIm();
+        else if ((e = tab[index = (n - 1) & hash]) != null) {
+            TreeNodeIm<K, V> hd = null, tl = null;
+            do {
+                TreeNodeIm<K, V> p = replacementTreeNodeIm(e, null);
+                if (tl == null)
+                    hd = p;
+                else {
+                    p.prev = tl;
+                    tl.next = p;
+                }
+                tl = p;
+            } while ((e = e.next) != null);
+            if ((tab[index] = hd) != null)
+                hd.treeifyIm(tab);
+        }
+    }
+
+    public void putAll(MapImitate<? extends K, ? extends V> m) {
+        putMapEntriesIm(m, true);
+    }
+
+    public V remove(Object key) {
+        NodeIm<K, V> e;
+        return (e = remove)
+    }
+
+    final NodeIm<K, V> removeNodeIm(int hash, Object key, Object value, boolean matchValue, boolean movable) {
+        NodeIm<K, V>[] tab;
+        NodeIm<K, V> p;
+        int n, index;
+        if ((tab = table) != null && (n = tab.length) > 0 && (p = tab[index = (n - 1) & hash]) != null) {
+            NodeIm<K, V> node = null, e;
+            K k;
+            V v;
+            if (p.hash == hash && ((k = p.key) == key) || (key != null) && key.equals(k))
+                node = p;
+            else if ((e = p.next) != null) {
+                if (p instanceof TreeNodeIm)
+                    node = ((TreeNodeIm<K, V>)p).getTreeNodeIm(hash, key);
+                else {
+                    do {
+                        if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))){
+                            node = e;
+                            break;
+                        }
+                    } while ((e = e.next) != null);
+                }
+            }
+            if (node != null && (!matchValue || (v = node.value) == value || (value != null && value.equals(v)))){
+                if (node instanceof TreeNodeIm)
+                    ((TreeNodeIm<K, V>)node).removeTreeNodeIm(this, tab, movable);
+                else if (node == p)
+                    tab[index] = node.next;
+                else
+                    p.next = node.next;
+                ++modCount;
+                --size;
+                afterNodeImRemoval(node);
+                return node;
+            }
+        }
+        return null;
+    }
+
+    NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
         return new NodeIm<>(hash, key, value, next);
     }
 
@@ -287,6 +413,19 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
 
     TreeNodeIm<K, V> newTreeNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
         return new TreeNodeIm<>(hash, key, value, next);
+    }
+
+    TreeNodeIm<K, V> replacementTreeNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
+        return new TreeNodeIm<>(p.hash, p.key, p.value, next);
+    }
+
+    void afterNodeImAccess(NodeIm<K, V> p) {
+    }
+
+    void afterNodeImInsertion(boolean evict) {
+    }
+
+    void afterNodeImRemoval(NodeIm<K, V> p){
     }
 
     /* ------------------------------------------------------------ */
