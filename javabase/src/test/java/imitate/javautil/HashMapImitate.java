@@ -5,8 +5,8 @@ import sun.reflect.generics.tree.Tree;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * user: xiangyu.wang
@@ -362,7 +362,8 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
 
     public V remove(Object key) {
         NodeIm<K, V> e;
-        return (e = remove)
+        return (e = removeNodeIm(hashIm(key), key, null, false, true)) == null ?
+                null : e.value;
     }
 
     final NodeIm<K, V> removeNodeIm(int hash, Object key, Object value, boolean matchValue, boolean movable) {
@@ -377,19 +378,19 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                 node = p;
             else if ((e = p.next) != null) {
                 if (p instanceof TreeNodeIm)
-                    node = ((TreeNodeIm<K, V>)p).getTreeNodeIm(hash, key);
+                    node = ((TreeNodeIm<K, V>) p).getTreeNodeIm(hash, key);
                 else {
                     do {
-                        if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))){
+                        if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))) {
                             node = e;
                             break;
                         }
                     } while ((e = e.next) != null);
                 }
             }
-            if (node != null && (!matchValue || (v = node.value) == value || (value != null && value.equals(v)))){
+            if (node != null && (!matchValue || (v = node.value) == value || (value != null && value.equals(v)))) {
                 if (node instanceof TreeNodeIm)
-                    ((TreeNodeIm<K, V>)node).removeTreeNodeIm(this, tab, movable);
+                    ((TreeNodeIm<K, V>) node).removeTreeNodeIm(this, tab, movable);
                 else if (node == p)
                     tab[index] = node.next;
                 else
@@ -401,6 +402,80 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             }
         }
         return null;
+    }
+
+    public void clearIm() {
+        NodeIm<K, V>[] tab;
+        modCount++;
+        if ((tab = table) != null && size > 0) {
+            size = 0;
+            for (int i = 0; i < tab.length; i++)
+                tab[i] = null;
+        }
+    }
+
+    public boolean containsValue(Object value) {
+        NodeIm<K, V>[] tab;
+        V v;
+        if ((tab = table) != null && size > 0) {
+            for (int i = 0; i < tab.length; i++) {
+                for (NodeIm<K, V> e = tab[i]; e != null; e = e.next) {
+                    if ((v = e.value) == value || (value != null && value.equals(v)))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Set<K> keySetIm() {
+        Set<K> ks = keySet;
+        if (ks == null) {
+            ks = new KeySetIm();
+            keySet = ks;
+        }
+        return ks;
+    }
+
+    final class KeySetIm extends AbstractSet<K> {
+        public final int size() {
+            return size;
+        }
+
+        public final void clear() {
+            HashMapImitate.this.clearIm();
+        }
+
+        public final Iterator<K> iterator() {
+            return new KeyIteratorIm();
+        }
+
+        public final boolean contains(Object o) {
+            return containsKeyIm(o);
+        }
+
+        public final boolean remove(Object key) {
+            return removeNodeIm(hashIm(key), key, null, false, true) != null;
+        }
+
+        public final Spliterator<K> spliterator() {
+            return new KeyS<>(HashMapImitate.this, 0, -1, 0, 0);
+        }
+
+        public final void forEach(Consumer<? super K> action) {
+            NodeIm<K, V>[] tab;
+            if (action == null)
+                throw new NullPointerException();
+            if (size > 0 && (tab = table) != null) {
+                int mc = modCount;
+                for (int i = 0; i < tab.length; i++) {
+                    for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
+                        action.accept(e.key);
+                }
+                if (modCount != mc)
+                    throw new ConcurrentModificationException();
+            }
+        }
     }
 
     NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
@@ -425,7 +500,84 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
     void afterNodeImInsertion(boolean evict) {
     }
 
-    void afterNodeImRemoval(NodeIm<K, V> p){
+    void afterNodeImRemoval(NodeIm<K, V> p) {
+    }
+
+    /* ------------------------------------------------------------ */
+    // iterators
+    abstract class HashIteratorIm {
+        NodeIm<K, V> next;
+        NodeIm<K, V> current;
+        int expectedModCount;
+        int index;
+
+        HashIteratorIm() {
+            expectedModCount = modCount;
+            NodeIm<K, V>[] t = table;
+            current = next = null;
+            index = 0;
+            if (t != null && size > 0) {
+                do {
+                } while (index < t.length && (next = t[index++]) == null);
+            }
+        }
+
+        public final boolean hasNext() {
+            return next != null;
+        }
+
+        final NodeIm<K, V> nextNodeIm() {
+            NodeIm<K, V>[] t;
+            NodeIm<K, V> e = next;
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            if (e == null)
+                throw new NoSuchElementException();
+            if ((next = (current = e).next) == null && (t = table) != null) {
+                do {
+                } while (index < t.length && (next = t[index++]) == null);
+            }
+            return e;
+        }
+
+        public final void remove() {
+            NodeIm<K, V> p = current;
+            if (p == null)
+                throw new IllegalStateException();
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
+            current = null;
+            K key = p.key;
+            removeNodeIm(hashIm(key), key, null, false, false);
+            expectedModCount = modCount;
+        }
+    }
+
+    final class KeyIteratorIm extends HashIteratorIm implements Iterator<K> {
+        public final K next() {
+            return nextNodeIm().key;
+        }
+    }
+
+    final class ValueIteratorIm extends HashIteratorIm implements Iterator<V> {
+        public final V next() {
+            return nextNodeIm().value;
+        }
+    }
+
+    final class EntryIteratorIm extends HashIteratorIm implements Iterator<MapImitate.EntryIm<K, V>> {
+        public final MapImitate.EntryIm<K, V> next(){
+            return nextNodeIm();
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    // spliterators
+    static class HashMapImSpliterator<K, V>{
+        final HashMapImitate<K, V> map;
+        NodeIm<K, V> current;
+        int index;
+        int fence;
     }
 
     /* ------------------------------------------------------------ */
