@@ -1,5 +1,6 @@
 package imitate.javautil;
 
+import com.sun.org.apache.bcel.internal.generic.IFGE;
 import sun.reflect.generics.tree.Tree;
 
 import java.io.Serializable;
@@ -187,7 +188,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
 
     public V get(Object key) {
         NodeIm<K, V> e;
-        return (e = getNodeIm(hashIm(key), key) == null ? null : e.value);
+        return (e = getNodeIm(hashIm(key), key)) == null ? null : e.value;
     }
 
     final NodeIm<K, V> getNodeIm(int hash, Object key) {
@@ -213,11 +214,6 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
     @Override
     public boolean containsKeyIm(Object key) {
         return false;
-    }
-
-    @Override
-    public Set<EntryIm<K, V>> entrySetIm() {
-        return null;
     }
 
     final V putValIm(int hash, K key, V value, boolean onlyIfAbsent, boolean evict) {
@@ -372,7 +368,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         int n, index;
         if ((tab = table) != null && (n = tab.length) > 0 && (p = tab[index = (n - 1) & hash]) != null) {
             NodeIm<K, V> node = null, e;
-            K k;
+            K k = null;
             V v;
             if (p.hash == hash && ((k = p.key) == key) || (key != null) && key.equals(k))
                 node = p;
@@ -381,7 +377,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                     node = ((TreeNodeIm<K, V>) p).getTreeNodeIm(hash, key);
                 else {
                     do {
-                        if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k))) {
+                        if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
                             node = e;
                             break;
                         }
@@ -414,7 +410,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
     }
 
-    public boolean containsValue(Object value) {
+    public boolean containsValueIm(Object value) {
         NodeIm<K, V>[] tab;
         V v;
         if ((tab = table) != null && size > 0) {
@@ -459,7 +455,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
 
         public final Spliterator<K> spliterator() {
-            return new KeyS<>(HashMapImitate.this, 0, -1, 0, 0);
+            return new KeySpliteratorIm<>(HashMapImitate.this, 0, -1, 0, 0);
         }
 
         public final void forEach(Consumer<? super K> action) {
@@ -477,6 +473,117 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             }
         }
     }
+
+    public Collection<V> values(){
+        Collection<V> vs = values;
+        if (vs == null){
+            vs = new ValuesIm();
+            values = vs;
+        }
+        return vs;
+    }
+
+    final class ValuesIm extends AbstractCollection<V>{
+
+        @Override
+        public final int size() {
+            return size;
+        }
+
+        public final void clear(){
+            HashMapImitate.this.clearIm();
+        }
+
+        @Override
+        public final Iterator<V> iterator() {
+            return new ValueIteratorIm();
+        }
+
+        public final boolean contains(Object o){
+            return containsValueIm(o);
+        }
+
+        public final Spliterator<V> spliterator(){
+            return new ValueSpliteratorIm<>(HashMapImitate.this, 0, -1, 0, 0);
+        }
+
+        public final void forEach(Consumer<? super V> action){
+            NodeIm<K, V>[] tab;
+            if (action == null)
+                throw new NullPointerException();
+            if (size > 0 && (tab = table) != null){
+                int mc = modCount;
+                for (int i = 0; i < tab.length; i++){
+                    for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
+                        action.accept(e.value);
+                }
+                if (modCount != mc)
+                    throw new ConcurrentModificationException();
+            }
+        }
+    }
+
+    public Set<MapImitate.EntryIm<K, V>> entrySetIm(){
+        Set<MapImitate.EntryIm<K, V>> es;
+        return (es = entryImSet) == null ? (entryImSet = new EntrySetIm()) : es;
+    }
+
+    final class EntrySetIm extends AbstractSet<MapImitate.EntryIm<K, V>>{
+
+        public final void clear(){
+            HashMapImitate.this.clearIm();
+        }
+
+        @Override
+        public Iterator<EntryIm<K, V>> iterator() {
+            return new EntryIteratorIm();
+        }
+
+        public final boolean contains(Object o){
+            if (!(o instanceof MapImitate.EntryIm))
+                return false;
+            MapImitate.EntryIm<?, ?> e = (EntryIm<?, ?>) o;
+            Object key = e.getKeyIm();
+            NodeIm<K, V> candidate = getNodeIm(hashIm(key), key);
+            return candidate != null && candidate.equals(e);
+        }
+
+        public final boolean  remove(Object o){
+            if (o instanceof MapImitate.EntryIm){
+                MapImitate.EntryIm<?, ?> e = (EntryIm<?, ?>) o;
+                Object key = e.getKeyIm();
+                Object value = e.getValueIm();
+                return removeNodeIm(hashIm(key), key, value, true, true) != null;
+            }
+            return false;
+        }
+
+        public final Spliterator<MapImitate.EntryIm<K, V>> spliterator(){
+            return new EntrySpliteratorIm<>(HashMapImitate.this, 0, -1, 0, 0);
+        }
+
+        public final void forEach(Consumer<? super MapImitate.EntryIm<K, V>> action){
+            NodeIm<K, V>[] tab;
+            if (action == null)
+                throw new NullPointerException();
+            if (size > 0 && (tab = table) != null){
+                int mc = modCount;
+                for (int i = 0; i < tab.length; i++){
+                    for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
+                        action.accept(e);
+                }
+                if (modCount != mc)
+                    throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+    }
+
+    // Overrides of JDK8 Map extension methods
 
     NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
         return new NodeIm<>(hash, key, value, next);
@@ -566,18 +673,248 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
     }
 
     final class EntryIteratorIm extends HashIteratorIm implements Iterator<MapImitate.EntryIm<K, V>> {
-        public final MapImitate.EntryIm<K, V> next(){
+        public final MapImitate.EntryIm<K, V> next() {
             return nextNodeIm();
         }
     }
 
     /* ------------------------------------------------------------ */
     // spliterators
-    static class HashMapImSpliterator<K, V>{
+    static class HashMapImSpliterator<K, V> {
         final HashMapImitate<K, V> map;
         NodeIm<K, V> current;
         int index;
         int fence;
+        int est;
+        int expectedModCount;
+
+        HashMapImSpliterator(HashMapImitate<K, V> m, int origin, int fence, int est, int expectedModCount) {
+            this.map = m;
+            this.index = origin;
+            this.fence = fence;
+            this.est = est;
+            this.expectedModCount = expectedModCount;
+        }
+
+        final int getFence() {
+            int hi;
+            if ((hi = fence) < 0) {
+                HashMapImitate<K, V> m = map;
+                est = m.size;
+                expectedModCount = m.modCount;
+                NodeIm<K, V>[] tab = m.table;
+                hi = fence = (tab == null) ? 0 : tab.length;
+            }
+            return hi;
+        }
+
+        public final long estimateSize() {
+            getFence();
+            return (long) est;
+        }
+    }
+
+    static final class KeySpliteratorIm<K, V> extends HashMapImSpliterator<K, V> implements Spliterator<K> {
+        KeySpliteratorIm(HashMapImitate<K, V> m, int origin, int fence, int est, int expectedModCount) {
+            super(m, origin, fence, est, expectedModCount);
+        }
+
+
+        @Override
+        public boolean tryAdvance(Consumer<? super K> action) {
+            int hi;
+            if (action == null)
+                throw new NullPointerException();
+            NodeIm<K, V>[] tab = map.table;
+            if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
+                while (current != null || index < hi) {
+                    if (current == null)
+                        current = tab[index++];
+                    else {
+                        K k = current.key;
+                        current = current.next;
+                        action.accept(k);
+                        if (map.modCount != expectedModCount)
+                            throw new ConcurrentModificationException();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public KeySpliteratorIm<K, V> trySplit() {
+            int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
+            return (lo >= mid || current != null) ? null : new KeySpliteratorIm<>(map, lo, index = mid, est >>>= 1, expectedModCount);
+        }
+
+        public void forEachRemaining(Consumer<? super K> action) {
+            int i, hi, mc;
+            if (action == null)
+                throw new NullPointerException();
+            HashMapImitate<K, V> m = map;
+            NodeIm<K, V>[] tab = m.table;
+            if ((hi = fence) < 0) {
+                mc = expectedModCount = m.modCount;
+                hi = fence = (tab == null) ? 0 : tab.length;
+            } else
+                mc = expectedModCount;
+            if (tab != null && tab.length >= hi && (i = index) >= 0 && (i < (index = hi) || current != null)) {
+                NodeIm<K, V> p = current;
+                current = null;
+                do {
+                    if (p == null)
+                        p = tab[i++];
+                    else {
+                        action.accept(p.key);
+                        p = p.next;
+                    }
+                } while (p != null || i < hi);
+                if (m.modCount != mc)
+                    throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public int characteristics() {
+            return (fence < 0 || est == map.size ? Spliterator.SIZED : 0) | Spliterator.DISTINCT;
+        }
+    }
+
+    static final class ValueSpliteratorIm<K, V> extends HashMapImSpliterator<K, V> implements Spliterator<V> {
+        ValueSpliteratorIm(HashMapImitate<K, V> m, int origin, int fence, int est, int expectedModCount) {
+            super(m, origin, fence, est, expectedModCount);
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super V> action) {
+            int hi;
+            if (action == null)
+                throw new NullPointerException();
+            NodeIm<K, V>[] tab = map.table;
+            if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
+                while (current != null || index < hi) {
+                    if (current == null)
+                        current = tab[index++];
+                    else {
+                        V v = current.value;
+                        current = current.next;
+                        action.accept(v);
+                        if (map.modCount != expectedModCount)
+                            throw new ConcurrentModificationException();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public ValueSpliteratorIm<K, V> trySplit() {
+            int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
+            return (lo >= mid || current != null) ? null : new ValueSpliteratorIm<>(map, lo, index = mid, est >>>= 1, expectedModCount);
+        }
+
+        public void forEachRemaining(Consumer<? super V> action) {
+            int i, hi, mc;
+            if (action == null)
+                throw new NullPointerException();
+            HashMapImitate<K, V> m = map;
+            NodeIm<K, V>[] tab = m.table;
+            if ((hi = fence) < 0) {
+                mc = expectedModCount = m.modCount;
+                hi = fence = (tab == null) ? 0 : tab.length;
+            } else
+                mc = expectedModCount;
+            if (tab != null && tab.length >= hi && (i = index) >= 0 && (i < (index = hi) || current != null)) {
+                NodeIm<K, V> p = current;
+                current = null;
+                do {
+                    if (p == null)
+                        p = tab[i++];
+                    else {
+                        action.accept(p.value);
+                        p = p.next;
+                    }
+                } while (p != null || i < hi);
+                if (m.modCount != mc)
+                    throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public int characteristics() {
+            return (fence < 0 || est == map.size ? Spliterator.SIZED : 0);
+        }
+    }
+
+    static final class EntrySpliteratorIm<K, V> extends HashMapImSpliterator<K, V> implements Spliterator<MapImitate.EntryIm<K, V>> {
+
+        EntrySpliteratorIm(HashMapImitate<K, V> m, int origin, int fence, int est, int expectedModCount) {
+            super(m, origin, fence, est, expectedModCount);
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super EntryIm<K, V>> action) {
+            int hi;
+            if (action == null)
+                throw new NullPointerException();
+            NodeIm<K, V>[] tab = map.table;
+            if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
+                while (current != null || index < hi) {
+                    if (current == null)
+                        current = tab[index++];
+                    else {
+                        NodeIm<K, V> e = current;
+                        current = current.next;
+                        action.accept(e);
+                        if (map.modCount != expectedModCount)
+                            throw new ConcurrentModificationException();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public EntrySpliteratorIm<K, V> trySplit() {
+            int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
+            return (lo >= mid || current != null) ? null : new EntrySpliteratorIm<>(map, lo, index = mid, est >>> 1, expectedModCount);
+        }
+
+        public void forEachRemaining(Consumer<? super MapImitate.EntryIm<K, V>> action) {
+            int i, hi, mc;
+            if (action == null)
+                throw new NullPointerException();
+            HashMapImitate<K, V> m = map;
+            NodeIm<K, V>[] tab = m.table;
+            if ((hi = fence) < 0) {
+                mc = expectedModCount = m.modCount;
+                hi = fence = (tab == null) ? 0 : tab.length;
+            } else
+                mc = expectedModCount;
+            if (tab != null && tab.length >= hi && (i = index) >= 0 && (i < (index = hi) || current != null)) {
+                NodeIm<K, V> p = current;
+                current = null;
+                do {
+                    if (p == null)
+                        p = tab[i++];
+                    else {
+                        action.accept(p);
+                        p = p.next;
+                    }
+                } while (p != null || i < hi);
+                if (m.modCount != mc)
+                    throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public int characteristics() {
+            return (fence < 0 || est == map.size ? Spliterator.SIZED : 0) | Spliterator.DISTINCT;
+        }
     }
 
     /* ------------------------------------------------------------ */
