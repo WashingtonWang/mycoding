@@ -1,13 +1,13 @@
 package imitate.javautil;
 
-import com.sun.org.apache.bcel.internal.generic.IFGE;
-import sun.reflect.generics.tree.Tree;
-
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * user: xiangyu.wang
@@ -474,23 +474,23 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
     }
 
-    public Collection<V> values(){
+    public Collection<V> values() {
         Collection<V> vs = values;
-        if (vs == null){
+        if (vs == null) {
             vs = new ValuesIm();
             values = vs;
         }
         return vs;
     }
 
-    final class ValuesIm extends AbstractCollection<V>{
+    final class ValuesIm extends AbstractCollection<V> {
 
         @Override
         public final int size() {
             return size;
         }
 
-        public final void clear(){
+        public final void clear() {
             HashMapImitate.this.clearIm();
         }
 
@@ -499,21 +499,21 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             return new ValueIteratorIm();
         }
 
-        public final boolean contains(Object o){
+        public final boolean contains(Object o) {
             return containsValueIm(o);
         }
 
-        public final Spliterator<V> spliterator(){
+        public final Spliterator<V> spliterator() {
             return new ValueSpliteratorIm<>(HashMapImitate.this, 0, -1, 0, 0);
         }
 
-        public final void forEach(Consumer<? super V> action){
+        public final void forEach(Consumer<? super V> action) {
             NodeIm<K, V>[] tab;
             if (action == null)
                 throw new NullPointerException();
-            if (size > 0 && (tab = table) != null){
+            if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
-                for (int i = 0; i < tab.length; i++){
+                for (int i = 0; i < tab.length; i++) {
                     for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
                         action.accept(e.value);
                 }
@@ -523,14 +523,14 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
     }
 
-    public Set<MapImitate.EntryIm<K, V>> entrySetIm(){
+    public Set<MapImitate.EntryIm<K, V>> entrySetIm() {
         Set<MapImitate.EntryIm<K, V>> es;
         return (es = entryImSet) == null ? (entryImSet = new EntrySetIm()) : es;
     }
 
-    final class EntrySetIm extends AbstractSet<MapImitate.EntryIm<K, V>>{
+    final class EntrySetIm extends AbstractSet<MapImitate.EntryIm<K, V>> {
 
-        public final void clear(){
+        public final void clear() {
             HashMapImitate.this.clearIm();
         }
 
@@ -539,7 +539,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             return new EntryIteratorIm();
         }
 
-        public final boolean contains(Object o){
+        public final boolean contains(Object o) {
             if (!(o instanceof MapImitate.EntryIm))
                 return false;
             MapImitate.EntryIm<?, ?> e = (EntryIm<?, ?>) o;
@@ -548,8 +548,8 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             return candidate != null && candidate.equals(e);
         }
 
-        public final boolean  remove(Object o){
-            if (o instanceof MapImitate.EntryIm){
+        public final boolean remove(Object o) {
+            if (o instanceof MapImitate.EntryIm) {
                 MapImitate.EntryIm<?, ?> e = (EntryIm<?, ?>) o;
                 Object key = e.getKeyIm();
                 Object value = e.getValueIm();
@@ -558,17 +558,17 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
             return false;
         }
 
-        public final Spliterator<MapImitate.EntryIm<K, V>> spliterator(){
+        public final Spliterator<MapImitate.EntryIm<K, V>> spliterator() {
             return new EntrySpliteratorIm<>(HashMapImitate.this, 0, -1, 0, 0);
         }
 
-        public final void forEach(Consumer<? super MapImitate.EntryIm<K, V>> action){
+        public final void forEach(Consumer<? super MapImitate.EntryIm<K, V>> action) {
             NodeIm<K, V>[] tab;
             if (action == null)
                 throw new NullPointerException();
-            if (size > 0 && (tab = table) != null){
+            if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
-                for (int i = 0; i < tab.length; i++){
+                for (int i = 0; i < tab.length; i++) {
                     for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
                         action.accept(e);
                 }
@@ -584,6 +584,174 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
     }
 
     // Overrides of JDK8 Map extension methods
+
+    public V getOrDefaultIm(Object key, V defaultValue) {
+        NodeIm<K, V> e;
+        return (e = getNodeIm(hashIm(key), key)) == null ? defaultValue : e.value;
+    }
+
+    public V putIfAbsentIm(K key, V value) {
+        return putValIm(hashIm(key), key, value, true, true);
+    }
+
+    public boolean removeIm(Object key, Object value) {
+        return removeNodeIm(hashIm(key), key, value, true, true) != null;
+    }
+
+    public boolean replaceIm(K key, V oldValue, V newValue) {
+        NodeIm<K, V> e;
+        V v;
+        if ((e = getNodeIm(hashIm(key), key)) != null &&
+                ((v = e.value) == oldValue || (v != null && v.equals(oldValue)))) {
+            e.value = newValue;
+            afterNodeImAccess(e);
+            return true;
+        }
+        return false;
+    }
+
+    public V replaceIm(K key, V value) {
+        NodeIm<K, V> e;
+        if ((e = getNodeIm(hashIm(key), key)) != null) {
+            V oldValue = e.value;
+            e.value = value;
+            afterNodeImAccess(e);
+            return oldValue;
+        }
+        return null;
+    }
+
+    public V computeIfAbsentIm(K key, Function<? super K, ? extends V> mappingFunction) {
+        if (mappingFunction == null)
+            throw new NullPointerException();
+        int hash = hashIm(key);
+        NodeIm<K, V>[] tab;
+        NodeIm<K, V> first;
+        int n, i;
+        int binCount = 0;
+        TreeNodeIm<K, V> t = null;
+        NodeIm<K, V> old = null;
+        if (size > threshold || (tab = table) == null || (n = tab.length) == 0)
+            n = (tab = resizeIm()).length;
+        if ((first = tab[i = (n - 1) & hash]) != null) {
+            if (first instanceof TreeNodeIm)
+                old = (t = (TreeNodeIm<K, V>) first).getTreeNodeIm(hash, key);
+            else {
+                NodeIm<K, V> e = first;
+                K k;
+                do {
+                    if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
+                        old = e;
+                        break;
+                    }
+                    ++binCount;
+                } while ((e = e.next) != null);
+            }
+            V oldValue;
+            if (old != null && (oldValue = old.value) != null) {
+                afterNodeImAccess(old);
+                return oldValue;
+            }
+        }
+        V v = mappingFunction.apply(key);
+        if (v == null)
+            return null;
+        else if (old != null) {
+            old.value = v;
+            afterNodeImAccess(old);
+            return v;
+        } else if (t != null)
+            t.putTreeValIm(this, tab, hash, key, v);
+        else {
+            tab[i] = newNodeIm(hash, key, v, first);
+            if (binCount >= TREEIFY_THRESHOLD_IM - 1)
+                treeifyBinIm(tab, hash);
+        }
+        ++modCount;
+        ++size;
+        afterNodeImInsertion(true);
+        return v;
+    }
+
+    public V computeIfPresentIm(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        if (remappingFunction == null)
+            throw new NullPointerException();
+        NodeIm<K, V> e;
+        V oldValue;
+        int hash = hashIm(key);
+        if ((e = getNodeIm(hash, key)) != null && (oldValue = e.value) != null) {
+            V v = remappingFunction.apply(key, oldValue);
+            if (v != null) {
+                e.value = v;
+                afterNodeImAccess(e);
+                return v;
+            } else
+                removeNodeIm(hash, key, null, false, true);
+        }
+        return null;
+    }
+
+    public V computeIm(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        if (remappingFunction == null)
+            throw new NullPointerException();
+        int hash = hashIm(key);
+        NodeIm<K, V>[] tab;
+        NodeIm<K, V> first;
+        int n, i;
+        int binCount = 0;
+        TreeNodeIm<K, V> t = null;
+        NodeIm<K, V> old = null;
+        if (size > threshold || (tab = table) == null || (n = tab.length) == 0)
+            n = (tab = resizeIm()).length;
+        if ((first = tab[i = (n - 1) & hash]) != null) {
+            if (first instanceof TreeNodeIm)
+                old = (t = (TreeNodeIm<K, V>) first).getTreeNodeIm(hash, key);
+            else {
+                NodeIm<K, V> e = first;
+                K k = null;
+                do {
+                    if (e.hash == hash && ((k = e.key) == key) || (key != null && key.equals(k))){
+                        old = e;
+                        break;
+                    }
+                    ++binCount;
+                } while ((e = e.next) != null);
+            }
+        }
+        V oldValue = (old == null) ? null : old.value;
+        V v = remappingFunction.apply(key, oldValue);
+        if (old != null){
+            if (v != null){
+                old.value = v;
+                afterNodeImAccess(old);
+            } else
+                removeNodeIm(hash, key, null, false, true);
+        } else if (v != null){
+            if (t != null)
+                t.putTreeValIm(this, tab, hash, key, v);
+            else {
+                tab[i] = newNodeIm(hash, key, v, first);
+                if (binCount >= TREEIFY_THRESHOLD_IM - 1)
+                    treeifyBinIm(tab, hash);
+            }
+            ++modCount;
+            ++size;
+            afterNodeImInsertion(true);
+        }
+        return v;
+    }
+
+    public V mergeIm(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction){
+        if (value == null)
+            throw new NullPointerException();
+        if (remappingFunction == null)
+            throw new NullPointerException();
+        int hash = hashIm(key);
+        NodeIm<K, V>[] tab;
+        NodeIm<K, V> first;
+        int n, i;
+        int binCount = 0;
+    }
 
     NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
         return new NodeIm<>(hash, key, value, next);
