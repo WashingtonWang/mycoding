@@ -1,4 +1,4 @@
-package imitate.javautil;
+package imitate.java.util;
 
 /**
  * user: xiangyu.wang
