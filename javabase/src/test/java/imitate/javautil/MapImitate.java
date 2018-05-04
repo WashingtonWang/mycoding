@@ -88,7 +88,7 @@ public interface MapImitate<K, V> {
         }
     }
 
-    default void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    default void replaceAllIm(BiFunction<? super K, ? super V, ? extends V> function) {
         Objects.requireNonNull(function);
         for (MapImitate.EntryIm<K, V> entryIm : entrySetIm()) {
             K k;

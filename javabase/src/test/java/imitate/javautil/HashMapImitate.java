@@ -1,10 +1,10 @@
 package imitate.javautil;
 
-import javax.validation.constraints.Null;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -710,7 +710,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
                 NodeIm<K, V> e = first;
                 K k = null;
                 do {
-                    if (e.hash == hash && ((k = e.key) == key) || (key != null && key.equals(k))){
+                    if (e.hash == hash && ((k = e.key) == key) || (key != null && key.equals(k))) {
                         old = e;
                         break;
                     }
@@ -720,13 +720,13 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
         V oldValue = (old == null) ? null : old.value;
         V v = remappingFunction.apply(key, oldValue);
-        if (old != null){
-            if (v != null){
+        if (old != null) {
+            if (v != null) {
                 old.value = v;
                 afterNodeImAccess(old);
             } else
                 removeNodeIm(hash, key, null, false, true);
-        } else if (v != null){
+        } else if (v != null) {
             if (t != null)
                 t.putTreeValIm(this, tab, hash, key, v);
             else {
@@ -741,7 +741,7 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         return v;
     }
 
-    public V mergeIm(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction){
+    public V mergeIm(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
         if (value == null)
             throw new NullPointerException();
         if (remappingFunction == null)
@@ -751,71 +751,175 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         NodeIm<K, V> first;
         int n, i;
         int binCount = 0;
+        TreeNodeIm<K, V> t = null;
+        NodeIm<K, V> old = null;
+        if ((size > threshold || (tab = table) == null || (n = tab.length) == 0))
+            n = (tab = resizeIm()).length;
+        if ((first = tab[i = (n - 1) & hash]) != null) {
+            if (first instanceof TreeNodeIm)
+                old = (t = (TreeNodeIm<K, V>) first).getTreeNodeIm(hash, key);
+            else {
+                NodeIm<K, V> e = first;
+                K k;
+                do {
+                    if (e.hash == hash && ((k = e.key) == key || (key != null && key.equals(k)))) {
+                        old = e;
+                        break;
+                    }
+                    ++binCount;
+                } while ((e = e.next) != null);
+            }
+        }
+        if (old != null) {
+            V v;
+            if (old.value != null)
+                v = remappingFunction.apply(old.value, value);
+            else
+                v = value;
+            if (v != null) {
+                old.value = v;
+                afterNodeImAccess(old);
+            } else
+                removeNodeIm(hash, key, null, false, true);
+            return v;
+        }
+        if (value != null) {
+            if (t != null)
+                t.putTreeValIm(this, tab, hash, key, value);
+            else {
+                tab[i] = newNodeIm(hash, key, value, first);
+                if (binCount >= TREEIFY_THRESHOLD_IM - 1)
+                    treeifyBinIm(tab, hash);
+            }
+            ++modCount;
+            ++size;
+            afterNodeImInsertion(true);
+        }
+        return value;
     }
 
-    NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
-        return new NodeIm<>(hash, key, value, next);
+    public void forEachIm(BiConsumer<? super K, ? super V> action) {
+        NodeIm<K, V>[] tab;
+        if (action == null)
+            throw new NullPointerException();
+        if (size > 0 && (tab = table) != null) {
+            int mc = modCount;
+            for (int i = 0; i < tab.length; ++i) {
+                for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
+                    action.accept(e.key, e.value);
+            }
+            if (modCount != mc)
+                throw new ConcurrentModificationException();
+        }
     }
 
-    NodeIm<K, V> replacementNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
-        return new NodeIm<>(p.hash, p.key, p.value, next);
+    public void replaceAllIm(BiFunction<? super K, ? super V, ? extends V> function) {
+        NodeIm<K, V>[] tab;
+        if (function == null)
+            throw new NullPointerException();
+        if (size > 0 && (tab = table) != null) {
+            int mc = modCount;
+            for (int i = 0; i < tab.length; i++) {
+                for (NodeIm<K, V> e = tab[i]; e != null; e = e.next)
+                    e.value = function.apply(e.key, e.value);
+            }
+            if (modCount != mc)
+                throw new ConcurrentModificationException();
+        }
     }
 
-    TreeNodeIm<K, V> newTreeNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
-        return new TreeNodeIm<>(hash, key, value, next);
+    /* ------------------------------------------------------------ */
+    // Cloning and serialization
+    public Object clone() {
+        HashMapImitate<K, V> result;
+        try {
+            result = (HashMapImitate<K, V>) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+        result.reinitialize();
+        result.putMapEntriesIm(this, false);
+        return result;
     }
 
-    TreeNodeIm<K, V> replacementTreeNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
-        return new TreeNodeIm<>(p.hash, p.key, p.value, next);
+    final float loadFactor() {
+        return loadFactor;
     }
 
-    void afterNodeImAccess(NodeIm<K, V> p) {
+    final int capacity() {
+        return (table != null) ? table.length : (threshold > 0) ? threshold : DEFAULT_INITIAL_CAPACITY_IM;
     }
 
-    void afterNodeImInsertion(boolean evict) {
+    private void writeObjectIm(ObjectOutputStream s) throws IOException {
+        int buckets = capacity();
+        s.defaultWriteObject();
+        s.writeInt(buckets);
+        s.writeInt(size);
+        internalWriteEntries(s);
     }
 
-    void afterNodeImRemoval(NodeIm<K, V> p) {
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        reinitialize();
+        if (loadFactor <= 0 || Float.isNaN(loadFactor))
+            throw new InvalidObjectException("Illegal load factor: " + loadFactor);
+        s.readInt();
+        int mapppings = s.readInt();
+        if (mapppings < 0)
+            throw new InvalidObjectException("Illegal mapping count: " + mapppings);
+        else if (mapppings > 0) {
+            float lf = Math.min(Math.max(0.25f, loadFactor), 4.0f);
+            float fc = (float) mapppings / lf + 1.0f;
+            int cap = ((fc < DEFAULT_INITIAL_CAPACITY_IM) ? DEFAULT_INITIAL_CAPACITY_IM :
+                    (fc >= MAXIMUM_CAPACITY_IM) ? MAXIMUM_CAPACITY_IM : tableSizeForIm((int) fc));
+            float ft = (float) cap * lf;
+            threshold = ((cap < MAXIMUM_CAPACITY_IM && ft < MAXIMUM_CAPACITY_IM) ? (int) ft : Integer.MAX_VALUE);
+            NodeIm<K, V>[] tab = (NodeIm<K, V>[]) new NodeIm[cap];
+            table = tab;
+            for (int i = 0; i < mapppings; i++) {
+                K key = (K) s.readObject();
+                V value = (V) s.readObject();
+                putValIm(hashIm(key), key, value, false, false);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
     // iterators
-    abstract class HashIteratorIm {
+    abstract class HashIteratorIm{
         NodeIm<K, V> next;
         NodeIm<K, V> current;
         int expectedModCount;
         int index;
 
-        HashIteratorIm() {
+        HashIteratorIm(){
             expectedModCount = modCount;
             NodeIm<K, V>[] t = table;
             current = next = null;
             index = 0;
-            if (t != null && size > 0) {
-                do {
-                } while (index < t.length && (next = t[index++]) == null);
+            if (t != null && size > 0){
+                do { } while (index < t.length && (next = t[index++]) == null);
             }
         }
 
-        public final boolean hasNext() {
+        public final boolean hasNextIm(){
             return next != null;
         }
 
-        final NodeIm<K, V> nextNodeIm() {
+        final NodeIm<K, V> nextNodeIm(){
             NodeIm<K, V>[] t;
             NodeIm<K, V> e = next;
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             if (e == null)
                 throw new NoSuchElementException();
-            if ((next = (current = e).next) == null && (t = table) != null) {
-                do {
-                } while (index < t.length && (next = t[index++]) == null);
+            if ((next = (current = e).next) == null && (t = table) != null){
+                do {} while (index < t.length && (next = t[index++]) == null);
             }
             return e;
         }
 
-        public final void remove() {
+        public final void removeIm(){
             NodeIm<K, V> p = current;
             if (p == null)
                 throw new IllegalStateException();
@@ -828,21 +932,42 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
     }
 
-    final class KeyIteratorIm extends HashIteratorIm implements Iterator<K> {
-        public final K next() {
-            return nextNodeIm().key;
+    final class KeyIteratorIm extends HashIteratorIm implements Iterator<K>{
+
+        @Override
+        public boolean hasNext() {
+            return hasNextIm();
+        }
+
+        @Override
+        public K next() {
+            return super.nextNodeIm().key;
         }
     }
 
-    final class ValueIteratorIm extends HashIteratorIm implements Iterator<V> {
-        public final V next() {
-            return nextNodeIm().value;
+    final class ValueIteratorIm extends HashIteratorIm implements Iterator<V>{
+
+        @Override
+        public boolean hasNext() {
+            return hasNextIm();
+        }
+
+        @Override
+        public V next() {
+            return super.nextNodeIm().value;
         }
     }
 
-    final class EntryIteratorIm extends HashIteratorIm implements Iterator<MapImitate.EntryIm<K, V>> {
-        public final MapImitate.EntryIm<K, V> next() {
-            return nextNodeIm();
+    final class EntryIteratorIm extends HashIteratorIm implements Iterator<MapImitate.EntryIm<K, V>>{
+
+        @Override
+        public boolean hasNext() {
+            return hasNextIm();
+        }
+
+        @Override
+        public EntryIm<K, V> next() {
+            return super.nextNodeIm();
         }
     }
 
@@ -1017,7 +1142,8 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         }
     }
 
-    static final class EntrySpliteratorIm<K, V> extends HashMapImSpliterator<K, V> implements Spliterator<MapImitate.EntryIm<K, V>> {
+    static final class EntrySpliteratorIm<K, V> extends HashMapImSpliterator<K, V>
+            implements Spliterator<MapImitate.EntryIm<K, V>> {
 
         EntrySpliteratorIm(HashMapImitate<K, V> m, int origin, int fence, int est, int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
@@ -1082,6 +1208,55 @@ public class HashMapImitate<K, V> extends AbstractMapImitate<K, V>
         @Override
         public int characteristics() {
             return (fence < 0 || est == map.size ? Spliterator.SIZED : 0) | Spliterator.DISTINCT;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    // LinkedHashMap support
+    NodeIm<K, V> newNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
+        return new NodeIm<>(hash, key, value, next);
+    }
+
+    NodeIm<K, V> replacementNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
+        return new NodeIm<>(p.hash, p.key, p.value, next);
+    }
+
+    TreeNodeIm<K, V> newTreeNodeIm(int hash, K key, V value, NodeIm<K, V> next) {
+        return new TreeNodeIm<>(hash, key, value, next);
+    }
+
+    TreeNodeIm<K, V> replacementTreeNodeIm(NodeIm<K, V> p, NodeIm<K, V> next) {
+        return new TreeNodeIm<>(p.hash, p.key, p.value, next);
+    }
+
+    void reinitialize() {
+        table = null;
+        entryImSet = null;
+        keySet = null;
+        values = null;
+        modCount = 0;
+        threshold = 0;
+        size = 0;
+    }
+
+    void afterNodeImAccess(NodeIm<K, V> p) {
+    }
+
+    void afterNodeImInsertion(boolean evict) {
+    }
+
+    void afterNodeImRemoval(NodeIm<K, V> p) {
+    }
+
+    void internalWriteEntries(ObjectOutputStream s) throws IOException {
+        NodeIm<K, V>[] tab;
+        if (size > 0 && (tab = table) != null) {
+            for (int i = 0; i < tab.length; ++i) {
+                for (NodeIm<K, V> e = tab[i]; e != null; e = e.next) {
+                    s.writeObject(e.key);
+                    s.writeObject(e.value);
+                }
+            }
         }
     }
 
