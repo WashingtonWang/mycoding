@@ -47,7 +47,7 @@ public interface SpliteratorImitate<T> {
     public static final int SUBSIZED_IM = 0x00001000;
 
     public interface OfPrimitiveIm<T, T_CONS, T_SPLITR extends SpliteratorImitate.OfPrimitiveIm<T, T_CONS, T_SPLITR>>
-            extends SpliteratorImitate {
+            extends SpliteratorImitate<T> {
 
         T_SPLITR trySplitIm();
 
@@ -66,7 +66,7 @@ public interface SpliteratorImitate<T> {
         @Override
         boolean tryAdvanceIm(IntConsumer action);
 
-        default void forEachRemaining(IntConsumer action) {
+        default void forEachRemainingIm(IntConsumer action) {
             do {
             } while (tryAdvanceIm(action));
         }
@@ -81,11 +81,23 @@ public interface SpliteratorImitate<T> {
                 return tryAdvanceIm((IntConsumer) action::accept);
             }
         }
+
+        @Override
+        default void forEachRemainingIm(Consumer<? super Integer> action){
+            if (action instanceof IntConsumer){
+                forEachRemainingIm((IntConsumer) action);
+            } else {
+                if (TripwireImitate.ENABLED)
+                    TripwireImitate.trip(getClass(),
+                            "{0} calling Spliterator.OfInt.forEachRemaining((IntConsumer) action::accept)");
+                forEachRemainingIm((IntConsumer) action::accept);
+            }
+        }
     }
 
-    public interface OfLong extends OfPrimitiveIm<Long, LongConsumer, OfLong> {
+    public interface OfLongIm extends OfPrimitiveIm<Long, LongConsumer, OfLongIm> {
 
-        OfLong trySplitIm();
+        OfLongIm trySplitIm();
 
         boolean tryAdvanceIm(LongConsumer action);
 
@@ -105,7 +117,7 @@ public interface SpliteratorImitate<T> {
             }
         }
 
-        default void forEachRemaining(Consumer<? super Long> action) {
+        default void forEachRemainingIm(Consumer<? super Long> action) {
             if (action instanceof LongConsumer) {
                 forEachRemainingIm((LongConsumer) action);
             } else {
@@ -117,13 +129,13 @@ public interface SpliteratorImitate<T> {
         }
     }
 
-    public interface OfDouble extends OfPrimitiveIm<Double, DoubleConsumer, OfDouble> {
+    public interface OfDoubleIm extends OfPrimitiveIm<Double, DoubleConsumer, OfDoubleIm> {
 
-        OfDouble trySplitIm();
+        OfDoubleIm trySplitIm();
 
         boolean tryAdvanceIm(DoubleConsumer action);
 
-        default void forEachRemaining(DoubleConsumer action) {
+        default void forEachRemainingIm(DoubleConsumer action) {
             do {
             } while (tryAdvanceIm(action));
         }
@@ -139,14 +151,14 @@ public interface SpliteratorImitate<T> {
             }
         }
 
-        default void forEachReMainingIm(Consumer<? super Double> action) {
+        default void forEachRemainingIm(Consumer<? super Double> action) {
             if (action instanceof DoubleConsumer) {
-                forEachRemaining((DoubleConsumer) action);
+                forEachRemainingIm((DoubleConsumer) action);
             } else {
                 if (TripwireImitate.ENABLED)
                     TripwireImitate.trip(getClass(),
                             "{0} calling Spliterator.OfDouble.forEachRemaining((DoubleConsumer) action::accept)");
-                forEachRemaining((DoubleConsumer) action::accept);
+                forEachRemainingIm((DoubleConsumer) action::accept);
             }
         }
     }
