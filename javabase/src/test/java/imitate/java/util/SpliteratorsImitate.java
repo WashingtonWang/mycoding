@@ -1,8 +1,7 @@
 package imitate.java.util;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Objects;
+import java.time.temporal.ValueRange;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -109,104 +108,162 @@ public final class SpliteratorsImitate {
         return new IteratorSpliteratorIm<T>(Objects.requireNonNull(iterator), characteristics);
     }
 
-    public static SpliteratorImitate.OfIntIm spliteratorIm()
+    public static SpliteratorImitate.OfIntIm spliteratorIm(PrimitiveIteratorImitate.OfIntIm iterator, long size,
+                                                           int characteristics) {
+        return new IntIteratorSpliteratorIm(Objects.requireNonNull(iterator), size, characteristics);
+    }
 
-    static class IteratorSpliteratorIm<T> implements SpliteratorImitate<T> {
-        static final int BATCH_UNIT = 1 << 10;
-        static final int MAX_BATCH = 1 << 25;
-        private final CollectionImitate<? extends T> collection;
-        private IteratorImitate<? extends T> it;
-        private final int characteristics;
-        private long est;
-        private int batch;
+    public static SpliteratorImitate.OfIntIm spliteratorUnknownSizeIm(PrimitiveIteratorImitate.OfIntIm iterator,
+                                                                      int characteristics) {
+        return new IntIteratorSpliteratorIm(Objects.requireNonNull(iterator), characteristics);
+    }
 
-        public IteratorSpliteratorIm(CollectionImitate<? extends T> collection, int characteristics) {
-            this.collection = collection;
-            this.it = null;
-            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
-                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM : characteristics;
-        }
+    public static SpliteratorImitate.OfLongIm spliteratorIm(PrimitiveIteratorImitate.OfLongIm iterator, long size,
+                                                            int characteristics) {
+        return new LongIteratorSpliteratorIm(Objects.requireNonNull(iterator), size, characteristics);
+    }
 
-        public IteratorSpliteratorIm(IteratorImitate<? extends T> iterator, long size, int characteristics) {
-            this.collection = null;
-            this.it = iterator;
-            this.est = size;
-            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
-                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM : characteristics;
-        }
+    public static SpliteratorImitate.OfLongIm spliteratorUnknownSizeIm(PrimitiveIteratorImitate.OfLongIm iterator,
+                                                                       int characteristics) {
+        return new LongIteratorSpliteratorIm(Objects.requireNonNull(iterator), characteristics);
+    }
 
-        public IteratorSpliteratorIm(IteratorImitate<? extends T> iterator, int characteristics) {
-            this.collection = null;
-            this.it = iterator;
-            this.est = Long.MAX_VALUE;
-            this.characteristics = characteristics & ~(SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM);
-        }
+    public static SpliteratorImitate.OfDoubleIm spliterator(PrimitiveIteratorImitate.OfDoubleIm iterator, long size,
+                                                            int characteristics) {
+        return new DoubleIteratorSpliteratorIm(Objects.requireNonNull(iterator), size, characteristics);
+    }
 
+    public static SpliteratorImitate.OfDoubleIm spliteratorUnknownSize(PrimitiveIteratorImitate.OfDoubleIm iterator,
+                                                                       int characteristics) {
+        return new DoubleIteratorSpliteratorIm(Objects.requireNonNull(iterator), characteristics);
+    }
 
-        @Override
-        public boolean tryAdvanceIm(Consumer<? super T> action) {
-            if (action == null)
-                throw new NullPointerException();
-            if (it == null){
-                it = collection.iteratorIm();
-                est = (long) collection.sizeIm();
+    public static <T> IteratorImitate<T> iteratorIm(SpliteratorImitate<? extends T> spliterator) {
+        Objects.requireNonNull(spliterator);
+        class AdapterIm implements IteratorImitate<T>, Consumer<T> {
+            boolean valueReady = false;
+            T nextElement;
+
+            @Override
+            public boolean hasNextIm() {
+                if (!valueReady)
+                    spliterator.tryAdvanceIm(this);
+                return valueReady;
             }
-            if (it.hasNextIm()){
-                action.accept(it.nextIm());
-                return true;
-            }
-            return false;
-        }
 
-        @Override
-        public SpliteratorImitate<T> trySplitIm() {
-            IteratorImitate<? extends T> i;
-            long s;
-            if ((i = it) == null) {
-                i = it = collection.iteratorIm();
-                s = est = collection.sizeIm();
-            } else {
-                s = est;
-                if (s > 1 && i.hasNextIm()) {
-                    int n = batch + BATCH_UNIT;
-                    if (n > s)
-                        n = (int) s;
-                    if (n > MAX_BATCH)
-                        n = MAX_BATCH;
-                    Object[] a = new Object[n];
-                    int j = 0;
-                    do {
-                        a[j] = i.nextIm();
-                    } while (++j < n && i.hasNextIm());
-                    batch = j;
-                    if (est != Long.MAX_VALUE)
-                        est -= j;
-                    return new ArraySpliteratorIm<>(a, 0, j, characteristics);
+            @Override
+            public T nextIm() {
+                if (!valueReady && !hasNextIm())
+                    throw new NoSuchElementException();
+                else {
+                    valueReady = false;
+                    return nextElement;
                 }
             }
-            return null;
-        }
 
-        public void forEachRemainingIm(Consumer<? super T> action) {
-            if (action == null)
-                throw new NullPointerException();
-            IteratorImitate<? extends T> i;
-            if ((i = it) == null) {
-                i = it = collection.iteratorIm();
-                est = (long) collection.sizeIm();
+            @Override
+            public void accept(T t) {
+                valueReady = true;
+                nextElement = t;
             }
-            i.forEachRemainingIm(action);
         }
+        return new AdapterIm();
+    }
 
-        @Override
-        public long estimateSizeIm() {
-            return 0;
-        }
+    public static PrimitiveIteratorImitate.OfIntIm iteratorIm(SpliteratorImitate.OfIntIm spliterator) {
+        Objects.requireNonNull(spliterator);
+        class AdapterIm implements PrimitiveIteratorImitate.OfIntIm, IntConsumer {
+            boolean valueReady = false;
+            int nextElement;
 
-        @Override
-        public int characteristicsIm() {
-            return 0;
+            @Override
+            public int nextIntIm() {
+                if (!valueReady && !hasNextIm())
+                    throw new NoSuchElementException();
+                else {
+                    valueReady = false;
+                    return nextElement;
+                }
+            }
+
+            @Override
+            public boolean hasNextIm() {
+                if (!valueReady)
+                    spliterator.tryAdvanceIm(this);
+                return valueReady;
+            }
+
+            @Override
+            public void accept(int t) {
+                valueReady = true;
+                nextElement = t;
+            }
         }
+        return new AdapterIm();
+    }
+
+    public static PrimitiveIteratorImitate.OfLongIm iteratorIm(SpliteratorImitate.OfLongIm spliterator) {
+        Objects.requireNonNull(spliterator);
+        class AdapterIm implements PrimitiveIteratorImitate.OfLongIm, LongConsumer {
+            boolean valueReady = false;
+            Long nextElement;
+
+            @Override
+            public long nextLongIm() {
+                if (!valueReady && !hasNextIm())
+                    throw new NoSuchElementException();
+                else {
+                    valueReady = false;
+                    return nextElement;
+                }
+            }
+
+            @Override
+            public boolean hasNextIm() {
+                if (!valueReady)
+                    spliterator.tryAdvanceIm(this);
+                return valueReady;
+            }
+
+            @Override
+            public void accept(long t) {
+                valueReady = true;
+                nextElement = t;
+            }
+        }
+        return new AdapterIm();
+    }
+
+    public static PrimitiveIteratorImitate.OfDoubleIm iteratorIm(SpliteratorImitate.OfDoubleIm spliterator) {
+        Objects.requireNonNull(spliterator);
+        class AdapterIm implements PrimitiveIteratorImitate.OfDoubleIm, DoubleConsumer {
+            boolean valueReady = false;
+            double nextElement;
+
+            @Override
+            public double nextDoubleIm() {
+                if (!valueReady && !hasNextIm())
+                    throw new NoSuchElementException();
+                else {
+                    valueReady = false;
+                    return nextElement;
+                }
+            }
+
+            @Override
+            public boolean hasNextIm() {
+                if (!valueReady)
+                    spliterator.tryAdvanceIm(this);
+                return valueReady;
+            }
+
+            @Override
+            public void accept(double t) {
+                valueReady = true;
+                nextElement = t;
+            }
+        }
+        return new AdapterIm();
     }
 
     // Implementations
@@ -515,6 +572,398 @@ public final class SpliteratorsImitate {
                 throw new NullPointerException();
             if (index >= 0 && index < fence) {
                 action.accept(array[index++]);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    static class IteratorSpliteratorIm<T> implements SpliteratorImitate<T> {
+        static final int BATCH_UNIT = 1 << 10;
+        static final int MAX_BATCH = 1 << 25;
+        private final CollectionImitate<? extends T> collection;
+        private IteratorImitate<? extends T> it;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        public IteratorSpliteratorIm(CollectionImitate<? extends T> collection, int characteristics) {
+            this.collection = collection;
+            this.it = null;
+            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
+                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM : characteristics;
+        }
+
+        public IteratorSpliteratorIm(IteratorImitate<? extends T> iterator, long size, int characteristics) {
+            this.collection = null;
+            this.it = iterator;
+            this.est = size;
+            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
+                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM : characteristics;
+        }
+
+        public IteratorSpliteratorIm(IteratorImitate<? extends T> iterator, int characteristics) {
+            this.collection = null;
+            this.it = iterator;
+            this.est = Long.MAX_VALUE;
+            this.characteristics = characteristics & ~(SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM);
+        }
+
+
+        @Override
+        public boolean tryAdvanceIm(Consumer<? super T> action) {
+            if (action == null)
+                throw new NullPointerException();
+            if (it == null) {
+                it = collection.iteratorIm();
+                est = (long) collection.sizeIm();
+            }
+            if (it.hasNextIm()) {
+                action.accept(it.nextIm());
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public SpliteratorImitate<T> trySplitIm() {
+            IteratorImitate<? extends T> i;
+            long s;
+            if ((i = it) == null) {
+                i = it = collection.iteratorIm();
+                s = est = collection.sizeIm();
+            } else {
+                s = est;
+                if (s > 1 && i.hasNextIm()) {
+                    int n = batch + BATCH_UNIT;
+                    if (n > s)
+                        n = (int) s;
+                    if (n > MAX_BATCH)
+                        n = MAX_BATCH;
+                    Object[] a = new Object[n];
+                    int j = 0;
+                    do {
+                        a[j] = i.nextIm();
+                    } while (++j < n && i.hasNextIm());
+                    batch = j;
+                    if (est != Long.MAX_VALUE)
+                        est -= j;
+                    return new ArraySpliteratorIm<>(a, 0, j, characteristics);
+                }
+            }
+            return null;
+        }
+
+        public void forEachRemainingIm(Consumer<? super T> action) {
+            if (action == null)
+                throw new NullPointerException();
+            IteratorImitate<? extends T> i;
+            if ((i = it) == null) {
+                i = it = collection.iteratorIm();
+                est = (long) collection.sizeIm();
+            }
+            i.forEachRemainingIm(action);
+        }
+
+        @Override
+        public long estimateSizeIm() {
+            if (it == null) {
+                it = collection.iteratorIm();
+                return est = (long) collection.sizeIm();
+            }
+            return est;
+        }
+
+        @Override
+        public int characteristicsIm() {
+            return characteristics;
+        }
+
+        public Comparator<? super T> getComparatorIm() {
+            if (hasCharacteristicsIm(SpliteratorImitate.SORTED_IM))
+                return null;
+            throw new IllegalStateException();
+        }
+    }
+
+    //todo first
+    public static abstract class AbstractSpliteratorIm<T> implements SpliteratorImitate<T> {
+        static final int BATCH_UNIT = 1 << 10;
+        static final int MAX_BATCH = 1 << 25;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        protected AbstractSpliteratorIm(long est, int additionalCharacteristics) {
+            this.est = est;
+            this.characteristics = ((additionalCharacteristics & SpliteratorImitate.SIZED_IM) != 0) ?
+                    additionalCharacteristics | SpliteratorImitate.SUBSIZED_IM :
+                    additionalCharacteristics;
+        }
+
+        static final class HoldingConsumerIm<T> implements Consumer<T> {
+            Object value;
+
+            @Override
+            public void accept(T t) {
+                this.value = t;
+            }
+        }
+
+        public SpliteratorImitate<T> trySplitIm() {
+            HoldingConsumerIm<T> holder = new HoldingConsumerIm<>();
+            long s = est;
+            if (s > 1 && tryAdvanceIm(holder)) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                Object[] a = new Object[n];
+                int j = 0;
+                do {
+                    a[j] = holder.value;
+                } while (++j < n && tryAdvanceIm(holder));
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new ArraySpliteratorIm<>(a, 0, j, characteristics);
+            }
+            return null;
+        }
+
+        public long estimateSizeIm(){
+            return est;
+        }
+
+        public int characteristicsIm(){
+            return characteristics;
+        }
+
+    }
+
+    //todo
+    public static abstract class AbstractIntSpliterator implements SpliteratorImitate.OfIntIm{
+        static final int MAX_BATCH = AbstractSpliteratorIm.MAX_BATCH;
+        static final int BATCH_UNIT = AbstractSpliteratorIm.BATCH_UNIT;
+        private final int characteristics;
+        private long est;
+        private int batch;
+    }
+
+    static final class IntIteratorSpliteratorIm implements SpliteratorImitate.OfIntIm {
+        static final int BATCH_UNIT = IteratorSpliteratorIm.BATCH_UNIT;
+        static final int MAX_BATCH = IteratorSpliteratorIm.MAX_BATCH;
+        private PrimitiveIteratorImitate.OfIntIm it;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        public IntIteratorSpliteratorIm(PrimitiveIteratorImitate.OfIntIm iterator, long size, int characteristics) {
+            this.it = iterator;
+            this.est = size;
+            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
+                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM :
+                    characteristics;
+        }
+
+        public IntIteratorSpliteratorIm(PrimitiveIteratorImitate.OfIntIm iterator, int characteristics) {
+            this.it = iterator;
+            this.est = Long.MAX_VALUE;
+            this.characteristics = characteristics & ~(SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM);
+        }
+
+
+        @Override
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        @Override
+        public int characteristicsIm() {
+            return characteristics;
+        }
+
+        @Override
+        public OfIntIm trySplitIm() {
+            PrimitiveIteratorImitate.OfIntIm i = it;
+            long s = est;
+            if (s > 1 && i.hasNextIm()) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                int[] a = new int[n];
+                int j = 0;
+                do {
+                    a[j] = i.nextIntIm();
+                } while (++j < n && i.hasNextIm());
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new IntArraySpliteratorIm(a, 0, j, characteristics);
+            }
+            return null;
+        }
+
+        public void forEachRemainingIm(IntConsumer action) {
+            if (action == null)
+                throw new NullPointerException();
+            it.forEachRemainingIm(action);
+        }
+
+        @Override
+        public boolean tryAdvanceIm(IntConsumer action) {
+            if (action == null)
+                throw new NullPointerException();
+            if (it.hasNextIm()) {
+                action.accept(it.nextIntIm());
+                return true;
+            }
+            return false;
+        }
+    }
+
+    static final class LongIteratorSpliteratorIm implements SpliteratorImitate.OfLongIm {
+        static final int BATCH_UNIT = IteratorSpliteratorIm.BATCH_UNIT;
+        static final int MAX_BATCH = IteratorSpliteratorIm.MAX_BATCH;
+        private PrimitiveIteratorImitate.OfLongIm it;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        public LongIteratorSpliteratorIm(PrimitiveIteratorImitate.OfLongIm iterator, long size, int characteristics) {
+            this.it = iterator;
+            this.est = size;
+            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
+                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM :
+                    characteristics;
+        }
+
+        public LongIteratorSpliteratorIm(PrimitiveIteratorImitate.OfLongIm iterator, int characteristics) {
+            this.it = iterator;
+            this.est = Long.MAX_VALUE;
+            this.characteristics = characteristics & ~(SpliteratorImitate.SIZED_IM) | SpliteratorImitate.SUBSIZED_IM;
+        }
+
+        @Override
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        @Override
+        public int characteristicsIm() {
+            return characteristics;
+        }
+
+        @Override
+        public OfLongIm trySplitIm() {
+            PrimitiveIteratorImitate.OfLongIm i = it;
+            long s = est;
+            if (s > 1 && i.hasNextIm()) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                long[] a = new long[n];
+                int j = 0;
+                do {
+                    a[j] = i.nextLongIm();
+                } while (++j < n && i.hasNextIm());
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new LongArraySpliteratorIm(a, 0, j, characteristics);
+            }
+            return null;
+        }
+
+        public void forEachRemainingIm(LongConsumer action) {
+            if (action == null)
+                throw new NullPointerException();
+            it.forEachRemainingIm(action);
+        }
+
+        @Override
+        public boolean tryAdvanceIm(LongConsumer action) {
+            if (action == null)
+                throw new NullPointerException();
+            if (it.hasNextIm()) {
+                action.accept(it.nextLongIm());
+                return true;
+            }
+            return false;
+        }
+    }
+
+    static final class DoubleIteratorSpliteratorIm implements SpliteratorImitate.OfDoubleIm {
+        static final int BATCH_UNIT = IteratorSpliteratorIm.BATCH_UNIT;
+        static final int MAX_BATCH = IteratorSpliteratorIm.MAX_BATCH;
+        private PrimitiveIteratorImitate.OfDoubleIm it;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        public DoubleIteratorSpliteratorIm(PrimitiveIteratorImitate.OfDoubleIm iterator, long size, int characteristics) {
+            this.it = iterator;
+            this.est = size;
+            this.characteristics = (characteristics & SpliteratorImitate.CONCURRENT_IM) == 0 ?
+                    characteristics | SpliteratorImitate.SIZED_IM | SpliteratorImitate.SUBSIZED_IM :
+                    characteristics;
+        }
+
+        public DoubleIteratorSpliteratorIm(PrimitiveIteratorImitate.OfDoubleIm iterator, int characteristics) {
+            this.it = iterator;
+            this.est = Long.MAX_VALUE;
+            this.characteristics = characteristics & ~(SpliteratorImitate.SIZED_IM) | SpliteratorImitate.SUBSIZED_IM;
+        }
+
+        @Override
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        @Override
+        public int characteristicsIm() {
+            return characteristics;
+        }
+
+        @Override
+        public OfDoubleIm trySplitIm() {
+            PrimitiveIteratorImitate.OfDoubleIm i = it;
+            long s = est;
+            if (s > 1 && i.hasNextIm()) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                double[] a = new double[n];
+                int j = 0;
+                do {
+                    a[j] = i.nextDoubleIm();
+                } while (++j < n && i.hasNextIm());
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new DoubleArraySpliteratorIm(a, 0, j, characteristics);
+            }
+            return null;
+        }
+
+        public void forEachRemainingIm(DoubleConsumer action) {
+            if (action == null)
+                throw new NullPointerException();
+            it.forEachRemainingIm(action);
+        }
+
+        @Override
+        public boolean tryAdvanceIm(DoubleConsumer action) {
+            if (action == null) throw new NullPointerException();
+            if (it.hasNextIm()) {
+                action.accept(it.nextDoubleIm());
                 return true;
             }
             return false;
