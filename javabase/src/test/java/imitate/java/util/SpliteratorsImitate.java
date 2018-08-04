@@ -1,7 +1,8 @@
 package imitate.java.util;
 
-import java.time.temporal.ValueRange;
-import java.util.*;
+import java.util.Comparator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -578,6 +579,225 @@ public final class SpliteratorsImitate {
         }
     }
 
+    public static abstract class AbstractSpliteratorIm<T> implements SpliteratorImitate<T> {
+        static final int BATCH_UNIT = 1 << 10;
+        static final int MAX_BATCH = 1 << 25;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        protected AbstractSpliteratorIm(long est, int additionalCharacteristics) {
+            this.est = est;
+            this.characteristics = ((additionalCharacteristics & SpliteratorImitate.SIZED_IM) != 0) ?
+                    additionalCharacteristics | SpliteratorImitate.SUBSIZED_IM :
+                    additionalCharacteristics;
+        }
+
+        static final class HoldingConsumerIm<T> implements Consumer<T> {
+            Object value;
+
+            @Override
+            public void accept(T t) {
+                this.value = t;
+            }
+        }
+
+        public SpliteratorImitate<T> trySplitIm() {
+            HoldingConsumerIm<T> holder = new HoldingConsumerIm<>();
+            long s = est;
+            if (s > 1 && tryAdvanceIm(holder)) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                Object[] a = new Object[n];
+                int j = 0;
+                do {
+                    a[j] = holder.value;
+                } while (++j < n && tryAdvanceIm(holder));
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new ArraySpliteratorIm<>(a, 0, j, characteristics);
+            }
+            return null;
+        }
+
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        public int characteristicsIm() {
+            return characteristics;
+        }
+
+    }
+
+    public static abstract class AbstractIntSpliteratorIm implements SpliteratorImitate.OfIntIm {
+        static final int MAX_BATCH = AbstractSpliteratorIm.MAX_BATCH;
+        static final int BATCH_UNIT = AbstractSpliteratorIm.BATCH_UNIT;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        protected AbstractIntSpliteratorIm(long est, int additionalCharacteristics) {
+            this.est = est;
+            this.characteristics = ((additionalCharacteristics & SpliteratorImitate.SIZED_IM) != 0) ?
+                    additionalCharacteristics | SpliteratorImitate.SUBSIZED_IM :
+                    additionalCharacteristics;
+        }
+
+        static final class HoldingIntConsumer implements IntConsumer {
+            int value;
+
+            @Override
+            public void accept(int value) {
+                this.value = value;
+            }
+        }
+
+        public SpliteratorImitate.OfIntIm trySplitIm() {
+            HoldingIntConsumer holder = new HoldingIntConsumer();
+            long s = est;
+            if (s > 1 && tryAdvanceIm(holder)) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                int[] a = new int[n];
+                int j = 0;
+                do {
+                    a[j] = holder.value;
+                } while (++j < n && tryAdvanceIm(holder));
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new IntArraySpliteratorIm(a, 0, j, characteristicsIm());
+            }
+            return null;
+        }
+
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        public int characteristicsIm() {
+            return characteristics;
+        }
+    }
+
+    public static abstract class AbstractLongSpliteratorIm implements SpliteratorImitate.OfLongIm {
+        static final int MAX_BATCH = AbstractSpliteratorIm.MAX_BATCH;
+        static final int BATCH_UNIT = AbstractSpliteratorIm.BATCH_UNIT;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        protected AbstractLongSpliteratorIm(long est, int additionalCharacteristics) {
+            this.est = est;
+            this.characteristics = ((additionalCharacteristics & SpliteratorImitate.SIZED_IM) != 0) ?
+                    additionalCharacteristics | SpliteratorImitate.SUBSIZED_IM :
+                    additionalCharacteristics;
+        }
+
+        static final class HoldingLongConsumer implements LongConsumer {
+            long value;
+
+            @Override
+            public void accept(long value) {
+                this.value = value;
+            }
+        }
+
+        public SpliteratorImitate.OfLongIm trySplitIm() {
+            HoldingLongConsumer holder = new HoldingLongConsumer();
+            long s = est;
+            if (s > 1 && tryAdvanceIm(holder)) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                long[] a = new long[n];
+                int j = 0;
+                do {
+                    a[j] = holder.value;
+                } while (++j < n && tryAdvanceIm(holder));
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new LongArraySpliteratorIm(a, 0, j, characteristicsIm());
+            }
+            return null;
+        }
+
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        public int characteristicsIm() {
+            return characteristics;
+        }
+    }
+
+    public static abstract class AbstractDoublegSpliteratorIm implements SpliteratorImitate.OfDoubleIm {
+        static final int MAX_BATCH = AbstractSpliteratorIm.MAX_BATCH;
+        static final int BATCH_UNIT = AbstractSpliteratorIm.BATCH_UNIT;
+        private final int characteristics;
+        private long est;
+        private int batch;
+
+        protected AbstractDoublegSpliteratorIm(long est, int additionalCharacteristics) {
+            this.est = est;
+            this.characteristics = ((additionalCharacteristics & SpliteratorImitate.SIZED_IM) != 0) ?
+                    additionalCharacteristics | SpliteratorImitate.SUBSIZED_IM :
+                    additionalCharacteristics;
+        }
+
+        static final class HoldingDoubleConsumer implements DoubleConsumer {
+            double value;
+
+            @Override
+            public void accept(double value) {
+                this.value = value;
+            }
+        }
+
+        public SpliteratorImitate.OfDoubleIm trySplitIm() {
+            HoldingDoubleConsumer holder = new HoldingDoubleConsumer();
+            long s = est;
+            if (s > 1 && tryAdvanceIm(holder)) {
+                int n = batch + BATCH_UNIT;
+                if (n > s)
+                    n = (int) s;
+                if (n > MAX_BATCH)
+                    n = MAX_BATCH;
+                double[] a = new double[n];
+                int j = 0;
+                do {
+                    a[j] = holder.value;
+                } while (++j < n && tryAdvanceIm(holder));
+                batch = j;
+                if (est != Long.MAX_VALUE)
+                    est -= j;
+                return new DoubleArraySpliteratorIm(a, 0, j, characteristicsIm());
+            }
+            return null;
+        }
+
+        public long estimateSizeIm() {
+            return est;
+        }
+
+        public int characteristicsIm() {
+            return characteristics;
+        }
+    }
+
+    // Iterator-based Spliterators
+
     static class IteratorSpliteratorIm<T> implements SpliteratorImitate<T> {
         static final int BATCH_UNIT = 1 << 10;
         static final int MAX_BATCH = 1 << 25;
@@ -684,71 +904,6 @@ public final class SpliteratorsImitate {
                 return null;
             throw new IllegalStateException();
         }
-    }
-
-    //todo first
-    public static abstract class AbstractSpliteratorIm<T> implements SpliteratorImitate<T> {
-        static final int BATCH_UNIT = 1 << 10;
-        static final int MAX_BATCH = 1 << 25;
-        private final int characteristics;
-        private long est;
-        private int batch;
-
-        protected AbstractSpliteratorIm(long est, int additionalCharacteristics) {
-            this.est = est;
-            this.characteristics = ((additionalCharacteristics & SpliteratorImitate.SIZED_IM) != 0) ?
-                    additionalCharacteristics | SpliteratorImitate.SUBSIZED_IM :
-                    additionalCharacteristics;
-        }
-
-        static final class HoldingConsumerIm<T> implements Consumer<T> {
-            Object value;
-
-            @Override
-            public void accept(T t) {
-                this.value = t;
-            }
-        }
-
-        public SpliteratorImitate<T> trySplitIm() {
-            HoldingConsumerIm<T> holder = new HoldingConsumerIm<>();
-            long s = est;
-            if (s > 1 && tryAdvanceIm(holder)) {
-                int n = batch + BATCH_UNIT;
-                if (n > s)
-                    n = (int) s;
-                if (n > MAX_BATCH)
-                    n = MAX_BATCH;
-                Object[] a = new Object[n];
-                int j = 0;
-                do {
-                    a[j] = holder.value;
-                } while (++j < n && tryAdvanceIm(holder));
-                batch = j;
-                if (est != Long.MAX_VALUE)
-                    est -= j;
-                return new ArraySpliteratorIm<>(a, 0, j, characteristics);
-            }
-            return null;
-        }
-
-        public long estimateSizeIm(){
-            return est;
-        }
-
-        public int characteristicsIm(){
-            return characteristics;
-        }
-
-    }
-
-    //todo
-    public static abstract class AbstractIntSpliterator implements SpliteratorImitate.OfIntIm{
-        static final int MAX_BATCH = AbstractSpliteratorIm.MAX_BATCH;
-        static final int BATCH_UNIT = AbstractSpliteratorIm.BATCH_UNIT;
-        private final int characteristics;
-        private long est;
-        private int batch;
     }
 
     static final class IntIteratorSpliteratorIm implements SpliteratorImitate.OfIntIm {
@@ -967,6 +1122,13 @@ public final class SpliteratorsImitate {
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public Comparator<? super Double> getComparatorIm() {
+            if (hasCharacteristicsIm(SpliteratorImitate.SORTED_IM))
+                return null;
+            throw new IllegalStateException();
         }
     }
 }

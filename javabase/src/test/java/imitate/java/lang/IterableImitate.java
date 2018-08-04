@@ -5,7 +5,6 @@ import imitate.java.util.SpliteratorImitate;
 import imitate.java.util.SpliteratorsImitate;
 
 import java.util.Objects;
-import java.util.Spliterators;
 import java.util.function.Consumer;
 
 /**
@@ -16,15 +15,15 @@ public interface IterableImitate<T> {
 
     IteratorImitate<T> iteratorIm();
 
-    default void forEachIm(Consumer<? super T> action){
+    default void forEachIm(Consumer<? super T> action) {
         Objects.requireNonNull(action);
-        for (T t : this){
+        for (T t : this) {
             action.accept(t);
         }
     }
 
     //todo
-    default SpliteratorImitate<T> spliteratorIm(){
-        SpliteratorsImitate.spliteratorUnknownSizeIm(iteratorIm(), 0);
+    default SpliteratorImitate<T> spliteratorIm() {
+        return SpliteratorsImitate.spliteratorUnknownSizeIm(iteratorIm(), 0);
     }
 }
