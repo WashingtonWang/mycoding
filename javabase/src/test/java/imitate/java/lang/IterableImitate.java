@@ -17,13 +17,14 @@ public interface IterableImitate<T> {
 
     default void forEachIm(Consumer<? super T> action) {
         Objects.requireNonNull(action);
-        for (T t : this) {
-            action.accept(t);
-        }
+        //for (T t : this) {
+        //    action.accept(t);
+        //}
     }
 
     //todo
     default SpliteratorImitate<T> spliteratorIm() {
-        return SpliteratorsImitate.spliteratorUnknownSizeIm(iteratorIm(), 0);
+        return null;
+        //return SpliteratorsImitate.spliteratorUnknownSizeIm(iteratorIm(), 0);
     }
 }

@@ -45,7 +45,8 @@ public abstract class AbstractCollectionImitate<E> implements CollectionImitate<
     }
 
     public <T> T[] toArrayIm(T[] a){
-        int size
+        //int size
+        return null;
     }
 
     private static final int MAX_ARRAY_SIZE_IM = Integer.MAX_VALUE - 8;
