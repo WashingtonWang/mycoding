@@ -16,6 +16,10 @@ public class BitTest {
         ////打印二进制
         //System.out.println(Integer.toBinaryString(a));
 
+
+        int n = test11(10);
+        System.out.println(n);
+
     }
 
     /**
@@ -27,5 +31,16 @@ public class BitTest {
         hash ^= (hash >>> 20) ^ (hash >>> 12);
         int h = hash ^ (hash >>> 7) ^ (hash >>> 4);
         return h;
+    }
+
+    public static int test11(int cap){
+        int n = cap - 1;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        n |= n >>> 18;
+        return n;
     }
 }
