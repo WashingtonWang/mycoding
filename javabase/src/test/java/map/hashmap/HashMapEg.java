@@ -2,6 +2,7 @@ package map.hashmap;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -15,6 +16,11 @@ public class HashMapEg {
     public static void main(String[] args) {
         int r = tableSizeForImi(65);
         System.out.println(r);
+    }
+
+    public static void testHashtable() {
+        Map ht = new Hashtable();
+        ht.put("a", "b");
     }
 
     public static void test1() {
@@ -31,6 +37,7 @@ public class HashMapEg {
 
     /**
      * tableSizeFor的功能（不考虑大于最大容量的情况）是返回大于输入参数且最近的2的整数次幂的数
+     *
      * @param cap
      * @return
      */

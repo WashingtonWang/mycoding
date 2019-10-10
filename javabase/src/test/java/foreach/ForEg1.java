@@ -42,6 +42,5 @@ public class ForEg1 {
             });
             System.out.println("i----->" + i);
         }
-
     }
 }
