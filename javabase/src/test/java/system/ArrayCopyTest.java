@@ -1,0 +1,24 @@
+package system;
+
+/**
+ * native方法  arraycopy  使用例子
+ * @Description: This is description
+ * @Auther: wangxiangyu
+ * @Date: 2019/11/12 21:10
+ */
+public class ArrayCopyTest {
+    private static Object[] elementData = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    public static void main(String[] args) {
+        arrayCopy(elementData, 5, 10);
+    }
+
+    public static void arrayCopy(Object[] elementData, int index, int size) {
+        System.arraycopy(elementData, index + 1, elementData, index, size - index - 1);
+        elementData[--size] = null; // clear to let GC do its work
+
+        for (Object elementDatum : elementData) {
+            System.out.print(elementDatum + " ");
+        }
+    }
+}
