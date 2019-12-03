@@ -2,6 +2,7 @@ package com.xiangyu.function.collection.list.eg1;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -11,6 +12,12 @@ import java.util.function.Consumer;
  */
 public class ListForEachEg {
     public static void main(String[] args) {
+        List<String> list = Arrays.asList("123", "234", "345");
+        list.forEach(System.out::println);
+    }
+
+
+    public static void forEachTest(){
         /***********************forEach使用***************************/
         // 使用曾强for循环迭代
         ArrayList<String> list = new ArrayList<>(Arrays.asList("I", "love", "you"));
