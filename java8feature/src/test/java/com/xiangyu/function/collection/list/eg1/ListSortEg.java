@@ -25,5 +25,26 @@ public class ListSortEg {
         ArrayList<String> listLambda = new ArrayList<>(Arrays.asList("I", "love", "you", "too"));
         listLambda.sort(Comparator.comparingInt(String::length));
         listLambda.forEach(System.out::println);
+
+        //test();
     }
+
+    //public static void test(){
+    //
+    //    List<String> insertList = Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13");
+    //
+    //    int pageSize = 4;
+    //
+    //    if (insertList.size() > pageSize){
+    //        for (int pageIndex = 0; pageIndex < insertList.size(); pageIndex += 4){
+    //            System.out.println();
+    //            System.out.println("pageIndex: " + pageIndex);
+    //            List<String> budgetManagerList = insertList.subList(pageIndex, (pageIndex + pageSize) > insertList.size() ? insertList.size() : (pageIndex + pageSize));
+    //            for (String a:budgetManagerList) {
+    //                System.out.print(" | " + a);
+    //            }
+    //        }
+    //        System.out.println();
+    //    }
+    //}
 }
