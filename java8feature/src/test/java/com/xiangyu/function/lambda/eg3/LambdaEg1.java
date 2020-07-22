@@ -1,14 +1,51 @@
 package com.xiangyu.function.lambda.eg3;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LambdaEg1 {
     public static void main(String[] args){
+
+        List<Artist> allArtists = new ArrayList<>();
+        List members = new ArrayList();
+        members.add("wang");
+        members.add("xiang");
+        members.add("yu");
+        Artist artist1 = new Artist("1",members,"London",false);
+        Artist artist2 = new Artist("2",members,"London",true);
+        Artist artist3 = new Artist("3",members,"Old JinShan",true);
+        Artist artist4 = new Artist("4",members,"Washington DC",true);
+        Artist artist5 = new Artist("5",members,"LuoShanJi",false);
+
+        allArtists.add(artist1);
+        allArtists.add(artist2);
+        allArtists.add(artist3);
+        allArtists.add(artist4);
+        allArtists.add(artist5);
+
+        Map<String, Artist> artistMap = allArtists.stream().collect(Collectors.toMap(Artist::getName, x -> x));
+        artistMap.forEach((k, v) -> {
+            System.out.println(k + " | " + v.getOrigin());
+        });
+
+
+
+    }
+
+    public void test2(){
+        List members = new ArrayList();
+        members.add("wang");
+        members.add("xiang");
+        members.add("yu");
+        members.add("");
+        List<String> list = (List<String>) members.stream().filter(s -> s.equals("yu")).collect(Collectors.toList());
+        for (String s : list){
+            System.out.print( " | " + s);
+        }
+    }
+
+    public void test1(){
         List<Artist> allArtists = new ArrayList<>();
         List members = new ArrayList();
         members.add("wang");
@@ -54,9 +91,6 @@ public class LambdaEg1 {
                 .min(Comparator.comparing(track -> track.getName()))
                 .get();
         System.out.println(shortestTrack.getName());
-
-
-
     }
 
 }

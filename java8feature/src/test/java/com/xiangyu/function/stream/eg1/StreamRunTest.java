@@ -1,6 +1,7 @@
 package com.xiangyu.function.stream.eg1;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -154,7 +155,7 @@ public class StreamRunTest {
         private int index = 0;
         private Random random = new Random();
         public Person get(){
-            return new Person(index++, "StormTestUser"+index, random.nextInt(100));
+            return new Person(index++, "StormTestUser"+index, random.nextInt(100), BigDecimal.ONE);
         }
     }
 

@@ -15,14 +15,12 @@ public class SortArithmeticAll {
 
     public static void main(String[] args) {
         int[] arr = {1, 99, 83, 4, 22, 44, 12, 8, 3, 2, 66, 33, 98, 23, 6, 5, 7, 9, 10, 20};
-
         //bubbleSort(arr);
         //selectionSort(arr);
         //insertionSort(arr);
         //shellSort(arr);
-        arr = mergeSort(arr);
-        //quickSort(arr, 0, arr.length -1);
-
+        //arr = mergeSort(arr);
+        quickSort(arr, 0, arr.length -1);
         sout(arr);
     }
 
@@ -65,7 +63,7 @@ public class SortArithmeticAll {
                 arr[i] = arr[j];
                 i++;
             }
-            //从左向右找比基准数小的数
+            //从左向右找比基准数大的数
             while (i < j && arr[i] < baseval){
                 i++;
             }
