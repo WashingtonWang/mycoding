@@ -155,7 +155,7 @@ public class StreamRunTest {
         private int index = 0;
         private Random random = new Random();
         public Person get(){
-            return new Person(index++, "StormTestUser"+index, random.nextInt(100), BigDecimal.ONE);
+            return new Person(index++, "StormTestUser"+index, random.nextInt(100), BigDecimal.ONE, "北京");
         }
     }
 

@@ -16,9 +16,9 @@ import static java.util.stream.Collectors.toCollection;
  */
 public class RemoveDuplicate {
     public static void main(String[] args) {
-        Person p1 = new Person(1, "张三", 5, BigDecimal.ONE);
-        Person p2 = new Person(2, "李四", 6, BigDecimal.ONE);
-        Person p3 = new Person(3, "张三", 6, BigDecimal.ONE);
+        Person p1 = new Person(1, "张三", 5, BigDecimal.ONE, "北京");
+        Person p2 = new Person(2, "李四", 6, BigDecimal.ONE, "北京");
+        Person p3 = new Person(3, "张三", 6, BigDecimal.ONE, "北京");
 
         List<Person> list = new ArrayList<>();
         list.add(p1);
