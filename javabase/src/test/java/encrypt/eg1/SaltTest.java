@@ -10,6 +10,9 @@ import java.util.Random;
  * @Date: 2020/8/24 15:05
  */
 public class SaltTest {
+
+    private static final Random RANDOM = new Random();
+
     public static void main(String[] args) {
         saltGenerator();
     }
@@ -32,14 +35,13 @@ public class SaltTest {
         String allStr = symbol + number + uppCase + lowCase;
         System.out.println(allStr);
 
-        Random random = new Random();
         StringBuilder sb = new StringBuilder();
         HashMap<Integer, Integer> hashMap = new HashMap<>();
 
         int times = 0;
         long a = System.currentTimeMillis();
         do {
-            int next = random.nextInt(allStr.length());
+            int next = RANDOM.nextInt(allStr.length());
             System.out.println(++times);
             if (!Objects.isNull(hashMap.get(next))) {
                 continue;
@@ -61,8 +63,7 @@ public class SaltTest {
     private static String symbolGenerator(String str4) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 3; i++) {
-            Random random = new Random();
-            int r = random.nextInt(str4.length());
+            int r = RANDOM.nextInt(str4.length());
             char s = str4.charAt(r);
             sb.append(s);
         }
@@ -76,8 +77,7 @@ public class SaltTest {
     private static String numberGenerator(String str3) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 3; i++) {
-            Random random = new Random();
-            int r = random.nextInt(str3.length());
+            int r = RANDOM.nextInt(str3.length());
             char s = str3.charAt(r);
             sb.append(s);
         }
@@ -91,8 +91,7 @@ public class SaltTest {
     private static String uppercaseGenerator(String str2) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5; i++) {
-            Random random = new Random();
-            int r = random.nextInt(str2.length());
+            int r = RANDOM.nextInt(str2.length());
             char s = str2.charAt(r);
             sb.append(s);
         }
@@ -105,8 +104,7 @@ public class SaltTest {
     private static String lowercaseGenerator(String str1) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5; i++) {
-            Random random = new Random();
-            int r = random.nextInt(str1.length());
+            int r = RANDOM.nextInt(str1.length());
             char s = str1.charAt(r);
             sb.append(s);
         }
