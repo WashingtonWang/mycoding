@@ -1,6 +1,7 @@
 package com.mycoding.springbootlearn;
 
-import com.mycoding.springbootlearn.starter.model.PersonServiceProperties;
+import com.mycoding.springbootlearn.starter.configuration.properties.DogProperties;
+import com.mycoding.springbootlearn.starter.configuration.properties.PersonServiceProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.Arrays;
 
 @SpringBootApplication
-@EnableConfigurationProperties({PersonServiceProperties.class})
+@EnableConfigurationProperties({PersonServiceProperties.class, DogProperties.class})
 public class SpringbootlearnApplication {
 
 	public static void main(String[] args) {

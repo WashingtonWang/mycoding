@@ -1,6 +1,6 @@
 package com.mycoding.springbootlearn.starter.service;
 
-import com.mycoding.springbootlearn.starter.model.PersonServiceProperties;
+import com.mycoding.springbootlearn.starter.configuration.properties.PersonServiceProperties;
 
 public class PersonService {
     private PersonServiceProperties person;

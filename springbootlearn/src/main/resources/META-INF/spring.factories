@@ -1,1 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.mycoding.springbootlearn.starter.config.PersonServiceAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.mycoding.springbootlearn.starter.configuration.PersonServiceAutoConfiguration,\
+  com.mycoding.springbootlearn.starter.configuration.AnimalAutoConfiguration
