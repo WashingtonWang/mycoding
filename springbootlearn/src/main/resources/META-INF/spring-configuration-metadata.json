@@ -1,0 +1,30 @@
+{
+  "hints":[],
+  "groups":[],
+  "properties": [
+    {
+      "sourceType": "com.mycoding.springbootlearn.starter.configuration.properties.DogProperties",
+      "name": "animal.dog.properties.name",
+      "description": "名称",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.mycoding.springbootlearn.starter.configuration.properties.DogProperties",
+      "name": "animal.dog.properties.sex",
+      "description": "性别",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.mycoding.springbootlearn.starter.configuration.properties.DogProperties",
+      "name": "animal.dog.properties.age",
+      "description": "年龄",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.mycoding.springbootlearn.starter.configuration.properties.DogProperties",
+      "name": "animal.dog.properties.enabled",
+      "description": "是否启用",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}
