@@ -1,7 +1,6 @@
 package com.xiangyu.function.stream.eg1;
 
-import org.assertj.core.util.Lists;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class StreamMapTest {
     }
 
     private static void mapTest(){
-        List<String> list =  Lists.newArrayList("123", "234", "456", "wang", "wxy", "xiang", "yu");
+        List<String> list =  Arrays.asList("123", "234", "456", "wang", "wxy", "xiang", "yu");
         list.stream().map(data -> {
            if (data != null){
                System.out.println("11111");
