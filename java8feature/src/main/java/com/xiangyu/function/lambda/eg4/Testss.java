@@ -1,7 +1,5 @@
 package com.xiangyu.function.lambda.eg4;
 
-import com.sun.org.apache.regexp.internal.RE;
-
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collector;
